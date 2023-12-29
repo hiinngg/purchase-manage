@@ -1,3 +1,0 @@
-﻿<template>
-   bom-list
-</template>

@@ -7,15 +7,15 @@
         </UAside>
       </template>
  
-      <slot />
+      <NuxtPage />
     </UPage>
   <UFooter />
 </template>
 <script setup>
 const links = [{
-  label: 'bom管理',
+  label: '产品bom管理',
   class:'ml-8',
-  to: '/bom-list'
+  to: '/product-list'
 }, {
   label: '采购管理',
   class:'ml-8',
