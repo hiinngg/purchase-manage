@@ -9,6 +9,7 @@
  
       <NuxtPage />
     </UPage>
+    <UNotifications />
   <UFooter />
 </template>
 <script setup>

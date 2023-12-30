@@ -3,25 +3,27 @@
     :validate="validate"
     :state="state"
     class=""
+    ref="form"
+    :validateOn="['input','submit']"
     @submit="onSubmit"
   >
     <UFormGroup class="mt-2" label="产品编号" name="productCode">
-      <UInput v-model="state.productCode" />
+      <UInput v-model="state.productCode" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="产品名称" name="productName">
-      <UInput v-model="state.productName" />
+      <UInput v-model="state.productName"  autocomplete="off"/>
     </UFormGroup>
     <UFormGroup class="mt-2" label="产品型号" name="productModel">
-      <UInput v-model="state.productModel" />
+      <UInput v-model="state.productModel" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="色温" name="productColortemperature">
-      <UInput v-model="state.productColortemperature" />
+      <UInput v-model="state.productColortemperature" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="瓦数" name="productWattage">
-      <UInput v-model="state.productWattage" />
+      <UInput v-model="state.productWattage" autocomplete="off" />
     </UFormGroup>
 
-    <UButton type="submit" class="mt-4" > Submit </UButton>
+    <UButton type="submit" class="mt-4" :loading="submitLoading"> 保存 </UButton>
   </UForm>
 </template>
 
@@ -34,6 +36,10 @@ const state = reactive({
   productWattage:undefined
 });
 
+const form = ref()
+const emits = defineEmits(['operSuccess'])
+const submitLoading = ref(false)
+const toast = useToast()
 const validate = (state) => {
   const errors = [];
   if (!state.productCode)
@@ -51,6 +57,35 @@ const validate = (state) => {
 
 async function onSubmit(event) {
   // Do something with data
+  form.value.clear()
   console.log(event.data);
+  submitLoading.value = true
+
+ try {
+  const {data,error,status} = await useFetch('/api/product/add',{
+    method:'post',
+    body:event.data,
+    watch:false,
+  })
+  if(status.value=='success'){
+    toast.add({title:'操作成功'})
+    emits('operSuccess')
+  
+  }else{
+    toast.add({title:error.value.data.message,color:'rose','icon':'i-ep-circle-close'}) 
+    if(error.value.data.data.errorCode==1001){
+      form.value.setErrors([{message:error.value.data.message,path:'productCode'}],'productCode')
+    }
+  }
+ } catch (error) {
+  console.log(error,'errorr')
+  // if (error.statusCode==400){
+  //   form.value.setErrors({path:'productCode',message:data.value.message})
+  // }
+ }
+
+ submitLoading.value = false
+
+  //
 }
 </script>
