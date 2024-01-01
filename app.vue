@@ -1,16 +1,17 @@
 <template>
-  <UHeader title="采购管理系统" />
-  <UPage>
+  <!-- <UHeader title="采购管理系统" /> -->
+  <!-- <UPage>
       <template #left>
         <UAside  class="aside">
           <UNavigationTree :links="links" default-open :multiple="false" />
         </UAside>
       </template>
  
-      <NuxtPage />
-    </UPage>
+   
+    </UPage> -->
+    <NuxtPage />
     <UNotifications />
-  <UFooter />
+  <!-- <UFooter /> -->
 </template>
 <script setup>
 const links = [{

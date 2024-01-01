@@ -1,9 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-  extends: ['@nuxt/ui-pro'],
+  devtools: { enabled: false },
   modules: ['@nuxt/ui','@nuxtjs/supabase'],
   supabase:{
     redirect:false
-  }
+  },
+  devServer: {
+    host: '127.0.0.1'
+  },
 })
