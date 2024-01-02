@@ -1,9 +1,9 @@
 <template>
   <UForm
+     ref="form"
     :validate="validate"
     :state="state"
-    class="space-y-4 w-2/3 mt-8"
-    @submit="onSubmit"
+    class="space-y-4 w-full pb-36"
   >
     <UFormGroup label="产品编号" name="productCode">
       <USelectMenu
@@ -35,7 +35,7 @@
         <div
           v-for="(item, index) in bomItemList"
           :key="item.id"
-          class="flex items-start w-3/5"
+          class="flex items-start w-100%"
         >
           <BomItemForm
            ref="bomItemForms"
@@ -55,18 +55,20 @@
       </div>
     </UFormGroup>
 
-    <UButton @click="handleBomSave"> 保存bom </UButton>
+    <UButton @click="handleBomSave" :loading="submitLoading" > 保存bom </UButton>
   </UForm>
 
   <!--开头  BC PC DZ -->
 </template>
 <script setup>
-
+  const toast = useToast()
 const selLoading = ref(true);
 const selMaterialLoading = ref(true);
-
+const submitLoading = ref(false)
 const bomItemList = ref([]);
 const bomItemForms = ref([])
+
+const form = ref(null)
 const state = reactive({
   productCode: undefined,
   materiaCodes: [],
@@ -82,10 +84,6 @@ const validate = (state) => {
   return errors;
 };
 
-async function onSubmit(event) {
-  // Do something with data
-  console.log(event.data);
-}
 
 const handleBomClick = () => {
   bomItemList.value.push({id:randomEntry()});
@@ -94,15 +92,53 @@ const handleDel= (index)=>{
   bomItemList.value.splice(index,1)
 }
 
-const handleBomSave = async ()=>{
+const handleBomSave = async (event)=>{
   const materialList = []
   for (const key in bomItemForms.value) {
     if (Object.hasOwnProperty.call(bomItemForms.value, key)) {
       const element = bomItemForms.value[key];
       const data =  await element.getFormData()
       materialList.push(data)
-      
     }
   }
+  state.materiaCodes = materialList
+  await onSubmit(event)
+
 }
+
+async function onSubmit(event) {
+    // Do something with data
+    form.value.clear()
+    console.log(event.data);
+    submitLoading.value = true
+  
+   try {
+    const {data,error,status} = await useFetch('/api/bom/add',{
+      method:'post',
+      body:state,
+      watch:false,
+    })
+    if(status.value=='success'){
+      toast.add({title:'操作成功'})
+      emits('operSuccess')
+    
+    }else{
+      toast.add({title:error.value.data.message,color:'rose','icon':'i-ep-circle-close'}) 
+      if(error.value.data.data.errorCode==1001){
+        form.value.setErrors([{message:error.value.data.message,path:'productCode'}],'materialCode')
+      }
+    }
+   } catch (error) {
+    console.log(error,'errorr')
+    // if (error.statusCode==400){
+    //   form.value.setErrors({path:'materialCode',message:data.value.message})
+    // }
+   }
+  
+   submitLoading.value = false
+  
+    //
+  }
+
+
 </script>

@@ -1,6 +1,7 @@
 ﻿<template>
      <UButton class="my-8" @click="handleClick">新增产品</UButton>
     <UButton class="my-8 ml-2" @click="handleMaterialClick">新增物料</UButton>
+    <UButton class="my-8 ml-2" @click="handleBomClick">新增bom</UButton>
    <!-- <UTable
    :loading="false"
   :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'No items.' }"
@@ -19,17 +20,29 @@
       <MaterialForm @operSuccess="isMaterialFormOpen = false"></MaterialForm>
     </UCard>
   </UModal>
+
+  <UModal v-model="isbomFormOpen">
+    <UCard>
+      <template #header> 新增BOM</template>
+      <BomForm @operSuccess="isbomFormOpen = false"></BomForm>
+    </UCard>
+  </UModal>
 </template>
 <script setup>
 
 const isOpen = ref(false);
 const isMaterialFormOpen = ref(false);
+const isbomFormOpen = ref(false);
 const handleClick = () => {
   isOpen.value = true;
 };
 const handleMaterialClick = () => {
   isMaterialFormOpen.value = true;
 };
+const handleBomClick = () => {
+  isbomFormOpen.value = true;
+};
+
 
 </script>
 <style lang="scss">
