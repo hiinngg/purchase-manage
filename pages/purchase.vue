@@ -38,10 +38,20 @@ const handleCompute = async ()=>{
   for (const key in purchaseForm.value) {
     if (Object.hasOwnProperty.call(purchaseForm.value, key)) {
       const element = purchaseForm.value[key];
+
       const itemData = await element.getFormData()
       data.push(itemData)
     }
   }
+  //整合数据 [...{orderCode: '123', productCode: 'p1', quantity: 1}...]
+  let processDataList = []
+  let _productCodeList = []
+  data.map((item)=>{
+    _productCodeList = _productCodeList.concat(item.productCodeList)
+    processDataList=  processDataList.concat(item.orderDetailList)
+  })
+  let productCodeList = Array.from(new Set(_productCodeList))
+  console.log(processDataList,productCodeList,'ddddddddd')
     
 }
 

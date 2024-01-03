@@ -7,7 +7,7 @@
     :validate="validate"
   >
     <div class="flex">
-      <UFormGroup  name="productCode" class="w-2/3">
+      <UFormGroup name="productCode" class="w-2/3">
         <USelectMenu
           v-model="state.productCode"
           :loading="selLoading"
@@ -44,38 +44,51 @@
   </UForm>
 </template>
 <script setup>
+const props = defineProps({
+  orderCode:{
+    default:''
+  }
+})
+
 const state = reactive({
-  orderCode: null,
-  productCode:null,
-  quantity:1
+  orderCode: props.orderCode,
+  productCode: null,
+  quantity: 1,
 });
 
-const form = ref(null)
+const form = ref(null);
 
 const selLoading = ref(true);
-const productStore = useProductStore()
-const productOriginalList = await productStore.fetchProduct();
-toRef(productOriginalList)
-selLoading.value = false;
 
+const productOriginalList = ref([])
+onMounted(async () => {
+  const productStore = useProductStore();
+   productStore.fetchProduct().then((res)=>{
+    productOriginalList.value  = res
+   });
+
+  selLoading.value = false;
+});
 
 const validate = async (state) => {
   const errors = [];
-  if (!state.productCode) errors.push({ path: "productCode", message: "请选择产品" });
-  if (!state.quantity>=0) errors.push({ path: "quantity", message: "请输入正确数量" });
+
+  if (!state.productCode){
+    errors.push({ path: "productCode", message: "请选择产品" });
+  }
+  if (state.quantity<=0){
+    errors.push({ path: "quantity", message: "请输入正确数量" });
+  }
+
   return errors;
 };
 
-const getFormData = async ()=>{
-   await form.value.validate()
-   return state;
-}
+const geSubFormData = async () => {
+  await form.value.validate();
+  return state;
+};
 
 defineExpose({
-    getFormData
-})
-
-
-
-
+  geSubFormData,
+});
 </script>
