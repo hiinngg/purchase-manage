@@ -4,10 +4,9 @@
     class="space-y-2"
     ref="form"
     :validateOn="['input', 'submit']"
-    @submit="onSubmit"
   >
-    <div>
-      <UFormGroup label="产品编号" name="productCode">
+    <div class="flex">
+      <UFormGroup  name="productCode" class="w-2/3">
         <USelectMenu
           v-model="state.productCode"
           :loading="selLoading"
@@ -15,7 +14,7 @@
           searchable-placeholder="查询产品编码"
           class="w-full"
           placeholder="选择产品编码"
-          :options="productList?.products"
+          :options="productOriginalList"
           option-attribute="product_name"
           label-attribute="product_code"
           value-attribute="product_code"
@@ -31,7 +30,7 @@
         </USelectMenu>
       </UFormGroup>
 
-      <UFormGroup name="quantity" class="w-1/3">
+      <UFormGroup name="quantity" class="w-1/3 ml-2">
         <UInput
           autocomplete="off"
           type="number"
@@ -45,12 +44,29 @@
 <script setup>
 const state = reactive({
   orderCode: null,
-  productList: [],
+  productCode:null,
+  quantity:1
 });
 
+const form = ref(null)
+
 const selLoading = ref(true);
-
-
-const { data: productList } = await useLazyFetch("/api/product/all");
+const productStore = useProductStore()
+const productOriginalList = await productStore.fetchProduct();
+toRef(productOriginalList)
 selLoading.value = false;
+
+
+const getFormData = async ()=>{
+   await form.value.validate('',{silent:true })
+   return state;
+}
+
+defineExpose({
+    getFormData
+})
+
+
+
+
 </script>

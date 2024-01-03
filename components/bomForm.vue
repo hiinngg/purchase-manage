@@ -13,7 +13,7 @@
         searchable-placeholder="查询产品编码"
         class="w-full"
         placeholder="选择产品编码"
-        :options="productList?.products"
+        :options="productList"
         option-attribute="product_name"
         label-attribute="product_code"
         value-attribute="product_code"
@@ -73,7 +73,10 @@ const state = reactive({
   productCode: undefined,
   materiaCodes: [],
 });
-const { data: productList } = await useLazyFetch("/api/product/all");
+
+const productStore = useProductStore()
+const productList = await productStore.fetchProduct();
+toRef(productList)
 const { data: materialList } = await useLazyFetch("/api/material/all");
 selLoading.value = false;
 selMaterialLoading.value = false;

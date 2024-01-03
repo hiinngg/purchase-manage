@@ -68,6 +68,8 @@ async function onSubmit(event) {
     watch:false,
   })
   if(status.value=='success'){
+    const productStore = useProductStore()
+    productStore.$reset()
     toast.add({title:'操作成功'})
     emits('operSuccess')
   

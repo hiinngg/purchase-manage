@@ -3,24 +3,91 @@
     :state="state"
     class="space-y-2"
     ref="form"
-    :validateOn="['input', 'submit']"
+    :validate="validate"
     @submit="onSubmit"
+    @error="onError"
   >
-    <UFormGroup class="mt-2" label="销售订单编号" name="orderCode">
-      <UInput v-model="state.orderId" autocomplete="off" />
+    <UFormGroup class="mt-2 w-3/5" label="销售订单编号" name="orderCode">
+      <UInput size="xl" v-model="state.orderCode" autocomplete="off"  />
     </UFormGroup>
-   
+    <UFormGroup class="mt-2" label="订单明细" name="products">
+      <UButton @click="addOrderDetail">增加订单明细</UButton>
+
+      <template v-for="(item, index) in state.orderDetailList" :key="item.id">
+        <div class="flex mt-2 items-center">
+          <OrderItemFrom ref="orderItem" class="w-4/5" />
+          <UButton
+            @click="handleDel(index)"
+            :padded="false"
+            class="ml-2"
+            color="red"
+            icon="i-heroicons-minus"
+          />
+          <UButton
+            icon="i-heroicons-magnifying-glass-16-solid"
+            :padded="false"
+            color="primary"
+            class="ml-2"
+          />
+        </div>
+      </template>
+    </UFormGroup>
   </UForm>
 </template>
 <script setup>
 const state = reactive({
   orderCode: null,
-  productList: [],
+  orderDetailList: [],
 });
 
+const form = ref(null);
+const orderItem = ref([]);
 const selLoading = ref(true);
 
-
-const { data: productList } = await useLazyFetch("/api/product/all");
 selLoading.value = false;
+
+const handleDel = (index) => {
+  state.orderDetailList.splice(index, 1);
+};
+
+const addOrderDetail = () => {
+  state.orderDetailList.push({ id: randomEntry() });
+};
+
+const validate = async (state) => {
+  const errors = [];
+  if (!state.orderCode) errors.push({ path: "orderCode", message: "请输入订单编号",id:"orderCode" });
+  return errors;
+};
+
+const getFormData = async () => {
+  try {
+    await form.value.validate();
+    const dataList = [];
+    for (const key in orderItem.value) {
+      if (orderItem.hasOwnProperty.call(orderItem.value, key)) {
+        const element = orderItem.value[key];
+        const data = await element.getFormData();
+        dataList.push(data);
+      }
+    }
+    state.orderDetailList = dataList;
+    return state;
+  } catch (error) {
+    const element = document.getElementById(form.value.errors[0].id);
+    element?.focus();
+    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+};
+
+async function onError(event) {
+  const element = document.getElementById(event.errors[0].id);
+  element?.focus();
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+defineExpose({
+  getFormData,
+  onError,
+});
 </script>
