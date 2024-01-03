@@ -5,7 +5,6 @@
     ref="form"
     :validate="validate"
     @submit="onSubmit"
-    @error="onError"
   >
     <UFormGroup class="mt-2 w-3/5" label="销售订单编号" name="orderCode">
       <UInput size="xl" v-model="state.orderCode" autocomplete="off"  />
@@ -35,6 +34,8 @@
   </UForm>
 </template>
 <script setup>
+
+const emits = defineEmits(['error'])
 const state = reactive({
   orderCode: null,
   orderDetailList: [],
@@ -64,8 +65,9 @@ const getFormData = async () => {
   try {
     await form.value.validate();
     const dataList = [];
+    console.log(orderItem.value,'12312321321')
     for (const key in orderItem.value) {
-      if (orderItem.hasOwnProperty.call(orderItem.value, key)) {
+      if (Object.hasOwnProperty.call(orderItem.value, key)) {
         const element = orderItem.value[key];
         const data = await element.getFormData();
         dataList.push(data);
@@ -74,20 +76,12 @@ const getFormData = async () => {
     state.orderDetailList = dataList;
     return state;
   } catch (error) {
-    const element = document.getElementById(form.value.errors[0].id);
-    element?.focus();
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    console.log(error,'errorrrrr')
+    emits('error')
   }
 };
 
-async function onError(event) {
-  const element = document.getElementById(event.errors[0].id);
-  element?.focus();
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
 defineExpose({
   getFormData,
-  onError,
 });
 </script>

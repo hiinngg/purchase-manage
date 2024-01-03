@@ -4,6 +4,7 @@
     class="space-y-2"
     ref="form"
     :validateOn="['input', 'submit']"
+    :validate="validate"
   >
     <div class="flex">
       <UFormGroup  name="productCode" class="w-2/3">
@@ -36,6 +37,7 @@
           type="number"
           v-model="state.quantity"
           placeholder="数量"
+          min="1"
         />
       </UFormGroup>
     </div>
@@ -57,8 +59,15 @@ toRef(productOriginalList)
 selLoading.value = false;
 
 
+const validate = async (state) => {
+  const errors = [];
+  if (!state.productCode) errors.push({ path: "productCode", message: "请选择产品" });
+  if (!state.quantity>=0) errors.push({ path: "quantity", message: "请输入正确数量" });
+  return errors;
+};
+
 const getFormData = async ()=>{
-   await form.value.validate('',{silent:true })
+   await form.value.validate()
    return state;
 }
 

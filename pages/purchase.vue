@@ -2,7 +2,7 @@
   <div v-show="true" class="w-full pb-8 px-8 " style="overflow-y: auto; height:100%">
     <UButton class="mb-8" @click="handleAdd">增加订单</UButton>
     <UButton class="mb-8 ml-2" @click="handleCompute">汇总计算</UButton>
-    <div v-for="(item, index) in purchaseList" :key="item.id" class="p-4 shadow-lg">
+    <div v-for="(item, index) in purchaseList" :key="item.id"  class="p-4 shadow-lg">
       <div class="relative pb-4">
         <UButton
         @click="handleDel(index)"
@@ -11,7 +11,7 @@
           color="red"
           icon="i-heroicons-x-mark-20-solid"
         />
-        <PurchaseItemForm ref="purchaseForm" />
+        <PurchaseItemForm ref="purchaseForm" @error="handleError(item.id)" :id="item.id" />
   
       </div>
     </div>
@@ -43,6 +43,13 @@ const handleCompute = async ()=>{
     }
   }
     
+}
+
+const handleError = (id)=>{
+ 
+  const element = document.getElementById(id);
+  element?.focus();
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 </script>
