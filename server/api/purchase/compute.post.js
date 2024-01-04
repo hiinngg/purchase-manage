@@ -5,20 +5,11 @@ export default eventHandler(async (event) => {
   try {
     const client = await serverSupabaseClient(event)
     const body = await readBody(event)
-    for (const key in body) {
-        if (Object.hasOwnProperty.call(body, key)) {
-            const element = body[key];
-            //  //整合数据 [...{orderCode: '123', productCode: 'p1', quantity: 1}...]
-                 //         [p1,p2,p3...]
-                const { data, error } = await client
-                .from('product')
-                .select()
-                .in('name', ['Albania', 'Algeria'])    
-            
-        }
-    }
+    const { data, error } = await client
+    .rpc('getmaterialusagesummary',{products_arr:body.productCodeList})
+    console.log(data,'GetMaterialUsageSummary res=========>')
     if(!error){
-      return {statusCode:201,message:'操作成功'}
+      return {statusCode:201,message:'操作成功',data:data}
     }else{
       return {statusCode:error.code,message:error.message}
     }
