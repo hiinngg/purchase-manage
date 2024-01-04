@@ -44,14 +44,13 @@
   </UForm>
 </template>
 <script setup>
-const props = defineProps({
-  orderCode:{
-    default:''
-  }
-})
+// const props = defineProps({
+//   orderCode:{
+//     default:''
+//   }
+// })
 
 const state = reactive({
-  orderCode: props.orderCode,
   productCode: null,
   quantity: 1,
 });

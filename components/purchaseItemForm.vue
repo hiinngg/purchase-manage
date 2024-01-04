@@ -13,7 +13,7 @@
       <UButton @click="addOrderDetail">增加订单明细</UButton>
       <template v-for="(item, index) in orderDetailList" :key="item.id">
         <div class="flex mt-2 items-center">
-          <OrderItemFrom  :orderCode="state.orderCode" ref="orderItem" class="w-4/5" />
+          <OrderItemFrom   ref="orderItem" class="w-4/5" />
           <UButton
             @click="handleDel(index)"
             :padded="false"
@@ -76,13 +76,14 @@ const getFormData = async () => {
 
           const data = await element.geSubFormData();
           state.productCodeList.push(data.productCode)
-         dataList.push(data);
+         dataList.push({...data,orderCode:state.orderCode});
         }
       }
      state.orderDetailList = dataList    
      return state;
   } catch (error) {
     emits("error");
+    throw new Error(400);
   }
 
 };
