@@ -40,7 +40,12 @@
         />
       </UFormGroup>
     </div>
-
+    <UForm
+    :state="materialData"
+    class="space-y-2"
+    ref="subForm"
+    :validate="subFormValidate"
+  >
     <UTable
       :columns="columns"
       v-model="materialData"
@@ -50,7 +55,7 @@
       <template #price_per_material-data="{ row }">
         <UFormGroup
           class="w-3/6"
-          :name="'quantity-' + row.id"
+          :name="'price-' + row.id"
           v-if="materialData.find((v) => v.id == row.id)"
         >
           <UInput
@@ -65,7 +70,7 @@
       <template #total_quantity-data="{ row }">
         <UFormGroup
           class="w-3/6"
-          :name="'price-' + row.id"
+          :name="'quantity-' + row.id"
           v-if="materialData.find((v) => v.id == row.id)"
         >
           <UInput
@@ -78,6 +83,7 @@
         </UFormGroup>
       </template>
     </UTable>
+  </UForm>
   </UForm>
 </template>
 <script setup>
@@ -128,13 +134,14 @@ const materialData = ref([]);
 
 const bomStore = useBomStore();
 const form = ref(null);
-
+const subForm = ref(null)
 watch(
   () => state.productCode,
   async (productCode) => {
     if (productCode) {
       const _data = await bomStore.fetchBomByProductId(productCode);
       materialList.value = processMData(_data);
+      materialData.value = []
     }
   }
 );
@@ -178,14 +185,47 @@ const validate = async (state) => {
   if (state.quantity <= 0) {
     errors.push({ path: "quantity", message: "请输入正确数量" });
   }
+  if(materialData.value.length==0){
+    errors.push({
+      path: 'productCode',
+      message: "请选择物料",
+    });
+  }
 
   return errors;
 };
 
 const geSubFormData = async () => {
   await form.value.validate();
-  return state;
+  await subForm.value.validate();
+  return {...state,materialData:materialData.value};
 };
+
+
+const subFormValidate = async (state) => {
+  const errors = [];
+
+   for (const key in state) {
+    if (Object.hasOwnProperty.call(state, key)) {
+      const element = state[key];
+      if(!element.total_quantity){
+        errors.push({
+          path: "quantity-"+element.id,
+          message: "请输入数量",
+        });
+      }
+      if(!element.price_per_material){
+        errors.push({
+          path: "price-"+element.id,
+          message: "请输入单价",
+        });
+      }
+    }
+   }
+   console.log(errors,state,'errorssssssss1231231312312321')
+  return errors;
+};
+
 
 const handleQuantityChange = (event,id)=>{
   const Mindex  = materialList.value.findIndex(v=>v.id==id)

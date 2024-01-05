@@ -5,8 +5,17 @@
     style="overflow-y: auto; height: 100%"
   >
     <UButton class="mb-8" @click="handleAdd">增加订单</UButton>
-    <UButton class="mb-8 ml-2" @click="handleCompute" :loading="computeLoading"
+    <UButton
+      class="mb-8 ml-2"
+      @click="handleCompute(false)"
+      :loading="computeLoading"
       >汇总计算</UButton
+    >
+    <UButton
+      class="mb-8 ml-4"
+      :loading="computeLoading"
+      @click="handleCompute(true)"
+      >保存</UButton
     >
     <div
       v-for="(item, index) in purchaseList"
@@ -35,31 +44,30 @@
     style="overflow-y: auto; height: 100%"
   >
     <UButton class="mb-8" @click="handleBack">返回订单列表</UButton>
-    <UButton class="mb-8 ml-4" @click="handleMaterialSave">保存</UButton>
+
     <UForm
-    :state="materialData"
-    class="space-y-2"
-    ref="form"
-    :validate="validate"
-  >
-    <UTable :columns="columns" :rows="materialData">
-      <template #order_codes-data="{ row }">
-        <span>{{ getOrderCodes(row.origin_data) }}</span>
-      </template>
-      <template #total_quantity-data="{ row }">
-        <UFormGroup class="w-2/6" :name="'quantity-'+row.id">
-          <UInput v-model="row.total_quantity" type="number">
-          </UInput>
-        </UFormGroup>
-      </template>
-      <template #price-data="{ row }">
-        <UFormGroup class="w-2/6" :name="'price-'+row.id">
-          <UInput v-model="row.price" type="number">
-            <template #leading> ￥ </template>
-          </UInput>
-        </UFormGroup>
-      </template>
-    </UTable>
+      :state="materialData"
+      class="space-y-2"
+      ref="form"
+      :validate="validate"
+    >
+      <UTable :columns="columns" :rows="materialData">
+        <template #orderCodes-data="{ row }">
+          <span>{{ getOrderCodes(row.orderCodes) }}</span>
+        </template>
+        <!-- <template #total_quantity-data="{ row }">
+          <UFormGroup class="w-2/6" :name="'quantity-' + row.id">
+            <UInput v-model="row.total_quantity" type="number"> </UInput>
+          </UFormGroup>
+        </template>
+        <template #price-data="{ row }">
+          <UFormGroup class="w-2/6" :name="'price-' + row.id">
+            <UInput v-model="row.price" type="number">
+              <template #leading> ￥ </template>
+            </UInput>
+          </UFormGroup>
+        </template> -->
+      </UTable>
     </UForm>
   </div>
 </template>
@@ -71,7 +79,7 @@ const purchaseList = ref([]);
 const computeLoading = ref(false);
 const purchaseForm = ref([]);
 const whetherResult = ref(false);
-const form = ref(null)
+const form = ref(null);
 const materialData = ref([]);
 
 const columns = [
@@ -84,20 +92,25 @@ const columns = [
     label: "物料名称",
   },
   {
-    key: "stock",
+    key: "material_stock",
     label: "库存",
   },
   {
-    key: "order_codes",
+    key: "orderCodes",
     label: "来自订单",
+  },
+
+  {
+    key: "price_per_material",
+    label: "单价",
   },
   {
     key: "total_quantity",
     label: "总数量",
   },
   {
-    key: "price",
-    label: "单价",
+    key: "total_price",
+    label: "总价",
   },
 ];
 
@@ -109,10 +122,19 @@ const handleDel = (index) => {
   purchaseList.value.splice(index, 1);
 };
 
-const handleCompute = async () => {
+const handleCompute = async (whetherSave = false) => {
+  if (purchaseForm.value.length == 0) {
+    toast.add({
+      title: "请先添加订单",
+      color: "rose",
+      icon: "i-ep-circle-close",
+    });
+    return
+  }
+
   try {
     const _data = [];
-
+    computeLoading.value = true;
     for (const key in purchaseForm.value) {
       if (Object.hasOwnProperty.call(purchaseForm.value, key)) {
         const element = purchaseForm.value[key];
@@ -121,6 +143,52 @@ const handleCompute = async () => {
         _data.push(itemData);
       }
     }
+
+    materialData.value = processOrderList(_data);
+    console.log(materialData.value, whetherSave, "compute data=========>");
+    if (!whetherSave) {
+      toast.add({ title: "操作成功" });
+      whetherResult.value = true;
+      computeLoading.value = false;
+    } else {
+      //保存价格
+      const { data: data1, error: error1 } = await useFetch("/api/price/add", {
+        method: "post",
+        body: {
+          data: materialData.value.map((v) => ({
+            ...v,
+            orderCodes: Array.from(v.orderCodes).join("，"),
+          })),
+        },
+        watch: false,
+      });
+      //保存采购订单
+      const { data, error, status } = await useFetch("/api/purchase/add", {
+        method: "post",
+        body: { data: _data },
+        watch: false,
+      });
+      if (data.value.statusCode == "201" && data1.value.statusCode == "201") {
+        toast.add({ title: "操作成功" });
+      } else {
+        const errprMsg = error?.value?.data ||
+          error1?.value?.data || { message: "未知错误" };
+        toast.add({
+          title: errprMsg.message,
+          color: "rose",
+          icon: "i-ep-circle-close",
+        });
+        // if (error.value.data.data.errorCode == 1001) {
+        //   form.value.setErrors(
+        //     [{ message: error.value.data.message, path: "productCode" }],
+        //     "materialCode"
+        //   );
+        // }
+      }
+      computeLoading.value = false;
+    }
+
+    return true;
     //整合数据 [...{orderCode: '123', productCode: 'p1', quantity: 1}...]
     let processDataList = [];
     let _productCodeList = [];
@@ -149,6 +217,7 @@ const handleCompute = async () => {
       // }
     }
   } catch (error) {
+    computeLoading.value = false;
     console.log(error, "errorr");
     // if (error.statusCode==400){
     //   form.value.setErrors({path:'materialCode',message:data.value.message})
@@ -186,7 +255,7 @@ const processData = (data, orderList) => {
                 id: randomEntry(),
                 material_code: materialItem.material_code,
                 material_name: materialItem.material_name,
-                stock:materialItem.stock,
+                stock: materialItem.stock,
                 total_quantity: sumQuantity,
                 origin_data: [orderItem],
                 price: 0,
@@ -206,34 +275,82 @@ const processData = (data, orderList) => {
 };
 
 const getOrderCodes = (arr) => {
-  return Array.from(new Set(arr.map((item) => item.orderCode))).join("，");
+  // return Array.from(new Set(arr.map((item) => item.orderCode))).join("，");
+  return Array.from(arr).join("，");
 };
 
+const processOrderList = (originalData) => {
+  const materialData = [];
+  for (const k in originalData) {
+    if (Object.hasOwnProperty.call(originalData, k)) {
+      const element = originalData[k];
+      for (const j in element.orderDetailList) {
+        if (Object.hasOwnProperty.call(element.orderDetailList, j)) {
+          const productItem = element.orderDetailList[j];
+
+          for (const q in productItem.materialData) {
+            if (Object.hasOwnProperty.call(productItem.materialData, q)) {
+              const materialItem = productItem.materialData[q];
+
+              const index = materialData.findIndex(
+                (v) => v.material_code == materialItem.material_code
+              );
+
+              if (index < 0) {
+                const newItem = {
+                  material_code: materialItem.material_code,
+                  material_name: materialItem.material_name,
+                  material_stock: materialItem.material_stock,
+                  total_price: materialItem.total_price,
+                  total_quantity: materialItem.total_quantity,
+                  price_per_material: materialItem.price_per_material,
+                  orderCodes: new Set(),
+                };
+                newItem["orderCodes"].add(element.orderCode);
+                materialData.push(newItem);
+              } else {
+                materialData[index]["total_price"] =
+                  materialData[index]["total_price"] + materialItem.total_price;
+
+                materialData[index]["total_quantity"] =
+                  materialData[index]["total_quantity"] +
+                  materialItem.total_quantity;
+
+                materialData[index]["orderCodes"].add(element.orderCode);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return materialData;
+};
 
 const validate = async (state) => {
   const errors = [];
 
-   for (const key in state) {
+  for (const key in state) {
     if (Object.hasOwnProperty.call(state, key)) {
       const element = state[key];
-      if(!element.total_quantity){
+      if (!element.total_quantity) {
         errors.push({
-          path: "quantity-"+element.id,
+          path: "quantity-" + element.id,
           message: "请输入数量",
         });
       }
-      if(!element.price){
+      if (!element.price) {
         errors.push({
-          path: "price-"+element.id,
+          path: "price-" + element.id,
           message: "请输入单价",
         });
       }
     }
-   }
-   console.log(errors,state,'errorssssssss')
+  }
+  console.log(errors, state, "errorssssssss");
   return errors;
 };
-const handleMaterialSave = ()=>{
-  form.value.validate() 
-}
+const handleMaterialSave = () => {
+  form.value.validate();
+};
 </script>
