@@ -12,7 +12,7 @@
     <UFormGroup class="mt-2" label="订单明细" name="products">
       <UButton @click="addOrderDetail">增加订单明细</UButton>
       <template v-for="(item, index) in orderDetailList" :key="item.id">
-        <div class="flex mt-2 items-center">
+        <div class="flex mt-2 items-start">
           <OrderItemFrom   ref="orderItem" class="w-4/5" />
           <UButton
             @click="handleDel(index)"
@@ -83,7 +83,7 @@ const getFormData = async () => {
      return state;
   } catch (error) {
     emits("error");
-    throw new Error(400);
+    throw new Error(error);
   }
 
 };

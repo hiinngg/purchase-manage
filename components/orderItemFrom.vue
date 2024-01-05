@@ -23,9 +23,7 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{
-                product.product_name
-              }}</span
+              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
             >
           </template>
         </USelectMenu>
@@ -36,11 +34,50 @@
           autocomplete="off"
           type="number"
           v-model="state.quantity"
+          @change="handleChangeQuantity"
           placeholder="数量"
           min="1"
         />
       </UFormGroup>
     </div>
+
+    <UTable
+      :columns="columns"
+      v-model="materialData"
+      v-if="materialList.length > 0"
+      :rows="materialList"
+    >
+      <template #price_per_material-data="{ row }">
+        <UFormGroup
+          class="w-3/6"
+          :name="'quantity-' + row.id"
+          v-if="materialData.find((v) => v.id == row.id)"
+        >
+          <UInput
+            v-model="row.price_per_material"
+            type="number"
+            @change="handlePriceChange($event, row.id)"
+          >
+            <template #leading> ￥ </template>
+          </UInput>
+        </UFormGroup>
+      </template>
+      <template #total_quantity-data="{ row }">
+        <UFormGroup
+          class="w-3/6"
+          :name="'price-' + row.id"
+          v-if="materialData.find((v) => v.id == row.id)"
+        >
+          <UInput
+            v-model="row.total_quantity"
+            type="number"
+            min="1"
+            @change="handleQuantityChange($event, row.id)"
+          >
+          </UInput>
+        </UFormGroup>
+      </template>
+    </UTable>
   </UForm>
 </template>
 <script setup>
@@ -55,16 +92,79 @@ const state = reactive({
   quantity: 1,
 });
 
+const columns = [
+  {
+    key: "material_code",
+    label: "物料编码",
+  },
+  {
+    key: "material_name",
+    label: "物料名称",
+  },
+  {
+    key: "material_stock",
+    label: "物料库存",
+  },
+  {
+    key: "quantity_per_product",
+    label: "单个产品所需数量",
+  },
+  {
+    key: "price_per_material",
+    label: "物料单价",
+  },
+  {
+    key: "total_quantity",
+    label: "总数量",
+  },
+  {
+    key: "total_price",
+    label: "总价",
+  },
+];
+
+const materialList = ref([]);
+const materialData = ref([]);
+
+const bomStore = useBomStore();
 const form = ref(null);
+
+watch(
+  () => state.productCode,
+  async (productCode) => {
+    if (productCode) {
+      const _data = await bomStore.fetchBomByProductId(productCode);
+      materialList.value = processMData(_data);
+    }
+  }
+);
+
+const processMData = (data) => {
+  const res = data.map((item) => {
+   const resItem =  {
+      id: randomEntry(),
+      material_code: item.material_code,
+      material_name: item.material.material_name,
+      material_stock: item.material.stock,
+      quantity_per_product: item.quantity,
+      total_quantity: state.quantity ? item.quantity * state.quantity : 0,
+      price_per_material: bomStore.materialList[item.material_code]['price']||0,
+
+    };
+    resItem['total_price'] = resItem.total_quantity * resItem.price_per_material
+    return resItem
+  });
+  return res;
+};
 
 const selLoading = ref(true);
 
-const productOriginalList = ref([])
+const productOriginalList = ref([]);
 onMounted(async () => {
   const productStore = useProductStore();
-   productStore.fetchProduct().then((res)=>{
-    productOriginalList.value  = res
-   });
+  productStore.fetchProduct().then((res) => {
+    productOriginalList.value = res;
+  });
 
   selLoading.value = false;
 });
@@ -72,10 +172,10 @@ onMounted(async () => {
 const validate = async (state) => {
   const errors = [];
 
-  if (!state.productCode){
+  if (!state.productCode) {
     errors.push({ path: "productCode", message: "请选择产品" });
   }
-  if (state.quantity<=0){
+  if (state.quantity <= 0) {
     errors.push({ path: "quantity", message: "请输入正确数量" });
   }
 
@@ -86,6 +186,70 @@ const geSubFormData = async () => {
   await form.value.validate();
   return state;
 };
+
+const handleQuantityChange = (event,id)=>{
+  const Mindex  = materialList.value.findIndex(v=>v.id==id)
+  if(Mindex>-1){
+    nextTick(()=>{
+      updateTotalPrice(Mindex)
+    })
+   
+  }
+}
+const handlePriceChange = (event,id)=>{
+  const Mindex  = materialList.value.findIndex(v=>v.id==id)
+  if(Mindex>-1){
+    nextTick(()=>{
+      bomStore.materialList[materialList.value[Mindex].material_code]['price'] = event.target.value
+      updateTotalPrice(Mindex)
+    })
+   
+  }
+}
+
+const handleChangeQuantity  = (event)=>{
+for (const key in materialList.value) {
+  if (Object.hasOwnProperty.call(materialList.value, key)) {
+    materialList.value[key]['total_quantity'] =  materialList.value[key]['quantity_per_product']*event.target.value
+    updateTotalPrice(key)
+  }
+}
+}
+
+const updateTotalPrice = (index)=>{
+  materialList.value[index]['total_price'] = materialList.value[index]['total_quantity'] * materialList.value[index]['price_per_material']
+  console.log(materialData.value,'44444444')
+}
+
+
+watch(
+  ()=>bomStore.materialList,
+  (state) => {
+    //更新价格
+    materialList.value.map((item,index)=>{
+      materialList.value[index].price_per_material = state[item.material_code]['price']||0
+      updateTotalPrice(index)
+    })
+  },
+  {
+    deep:true
+  }
+)
+
+
+// watch(
+//   materialList,
+//   (state) => {
+//     //更新价格
+//     materialList.value.map((item)=>{
+//       item['total_price'] = item['total_quantity'] * item['price_per_material']
+//     })
+//   },
+//   {
+//     deep:true
+//   }
+// )
+
 
 defineExpose({
   geSubFormData,
