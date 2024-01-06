@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxtjs/supabase": "^1.1.5",
+    "dayjs-nuxt": "^2.1.9",
     "nuxt": "^3.9.0",
     "sass": "^1.69.6",
     "vue": "^3.3.13",

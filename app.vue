@@ -39,7 +39,7 @@ const links = [
   {
     label: "采购管理",
     class: "ml-8",
-    to: "/purchase",
+    to: "/purchase/list",
   },
 ];
 </script>
