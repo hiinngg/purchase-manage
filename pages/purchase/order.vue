@@ -74,7 +74,12 @@
   <script setup>
   const toast = useToast();
   const productStore = useProductStore();
-  await productStore.fetchProduct();
+
+  onMounted(async()=>{
+    await productStore.fetchProduct();
+  })
+
+
   const purchaseList = ref([]);
   const computeLoading = ref(false);
   const purchaseForm = ref([]);

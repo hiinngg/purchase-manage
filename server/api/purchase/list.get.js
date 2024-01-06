@@ -15,13 +15,21 @@ export default eventHandler(async (event) => {
       });
     } else {
       data = await client.rpc("get_purchase_data", {
-        p_page_num: query.page_num,
+        p_page: query.page_num,
         p_page_size,
       });
     }
+    let total = 0
+    if(Array.isArray(data.data) && data.data.length>0){
+        total = data.data[0]['total']
+    }else{
+        total = 0
+    }
+    return {
+      total:total,
+      purchaseList:data.data
+    }
 
-    console.log(data.data,data);
-    return data.data;
   } catch (uncaughtError) {
     console.log(uncaughtError);
     throw createError(uncaughtError);
