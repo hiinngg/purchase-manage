@@ -9,18 +9,28 @@
  
    
     </UPage> -->
-    <div class="max-h-screen h-screen ">
-  <div class="py-4 pl-12 font-bold inline-block align-middle" style="height:60px;box-sizing: border-box;">
-    <h2>采购管理系统</h2>
-  </div>
-  <div class="flex w-100%" style="height:calc(100% - 60px)">
-    <div class="w-1/6 ">
-      <UVerticalNavigation :links="links" :ui="{width:'w-auto'}" />
-    </div>
-    <div class="flex-1 h-full" ><NuxtPage /></div>
-  </div>
 
-  <UNotifications />
+
+
+  <div  class="max-h-screen h-screen">
+
+
+
+
+    <div
+      class="py-4 pl-12 font-bold inline-block align-middle"
+      style="height: 60px; box-sizing: border-box"
+    >
+      <h2>采购管理系统</h2>
+    </div>
+    <div class="flex w-100%" style="height: calc(100% - 60px)">
+      <div class="w-1/6">
+        <UVerticalNavigation :links="links" :ui="{ width: 'w-auto' }" />
+      </div>
+      <div class="flex-1 h-full"><NuxtLoadingIndicator /><NuxtPage /></div>
+    </div>
+
+    <UNotifications />
   </div>
   <!-- <UFooter /> -->
 </template>

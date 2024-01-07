@@ -7,13 +7,18 @@
     @submit="onSubmit"
   >
     <UFormGroup class="mt-2 w-3/5" label="销售订单编号" name="orderCode">
-      <UInput size="xl" v-model="state.orderCode" autocomplete="off" />
+      <UInput size="xl" :disabled="props.originalData.purchase_id"   v-model="state.orderCode" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="订单明细" name="products">
       <UButton @click="addOrderDetail">增加订单明细</UButton>
-      <template v-for="(item, index) in orderDetailList" :key="item.id">
+      <template v-for="(item, index) in orderDetailList">
         <div class="flex mt-2 items-start">
-          <OrderItemFrom   ref="orderItem" class="w-4/5" />
+          <OrderItemFrom
+            :originalData="item"
+            :key="item.id"
+            ref="orderItem"
+            class="w-4/5"
+          />
           <UButton
             @click="handleDel(index)"
             :padded="false"
@@ -22,25 +27,44 @@
             icon="i-heroicons-minus"
           />
           <UButton
+            :id="item.id"
             icon="i-heroicons-magnifying-glass-16-solid"
+            :dynamic="true"
             :padded="false"
             color="primary"
             class="ml-2"
-          />
+          ></UButton>
         </div>
       </template>
     </UFormGroup>
   </UForm>
 </template>
 <script setup>
+const props = defineProps({
+  originalData: {
+    default: null,
+  },
+});
+
 const emits = defineEmits(["error"]);
 const state = reactive({
   orderCode: null,
-  orderDetailList: [],
-  productCodeList: []
+  productCodeList: [],
 });
 
-const orderDetailList = ref([])
+const orderDetailList = ref([]);
+
+if (props.originalData.order_code) {
+  state.orderCode = props.originalData.order_code;
+  if (Array.isArray(props.originalData.order_data)) {
+    props.originalData.order_data.map((item) => {
+      nextTick(() => {
+        orderDetailList.value.push({ id: randomEntry(), ...item });
+      });
+    });
+  }
+}
+
 const form = ref(null);
 const orderItem = ref([]);
 const selLoading = ref(true);
@@ -69,23 +93,29 @@ const validate = async (state) => {
 const getFormData = async () => {
   try {
     await form.value.validate();
-    const dataList = []    
-      for (const key in orderItem.value) {
-        if (Object.hasOwnProperty.call(orderItem.value, key)) {
-          const element = orderItem.value[key];
+    const dataList = [];
+    for (const key in orderItem.value) {
+      if (Object.hasOwnProperty.call(orderItem.value, key)) {
+        const element = orderItem.value[key];
 
-          const data = await element.geSubFormData();
-          state.productCodeList.push(data.productCode)
-         dataList.push({...data,orderCode:state.orderCode});
-        }
+        const data = await element.geSubFormData();
+        state.productCodeList.push(data.productCode);
+
+        const item = { ...data, orderCode: state.orderCode };
+
+        dataList.push(item);
       }
-     state.orderDetailList = dataList    
-     return state;
+    }
+
+    state.orderDetailList = dataList;
+    if (props.originalData.purchase_id) {
+      state.purchase_id = props.originalData.purchase_id;
+    }
+    return state;
   } catch (error) {
     emits("error");
     throw new Error(error);
   }
-
 };
 
 defineExpose({

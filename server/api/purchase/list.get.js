@@ -25,6 +25,7 @@ export default eventHandler(async (event) => {
     }else{
         total = 0
     }
+    console.log(data,'purchase list get =========>')
     return {
       total:total,
       purchaseList:data.data

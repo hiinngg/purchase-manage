@@ -23,7 +23,9 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
+              >编码：{{ product.product_code }}——名称：{{
+                product.product_name
+              }}</span
             >
           </template>
         </USelectMenu>
@@ -41,57 +43,58 @@
       </UFormGroup>
     </div>
     <UForm
-    :state="materialData"
-    class="space-y-2"
-    ref="subForm"
-    :validate="subFormValidate"
-  >
-    <UTable
-      :columns="columns"
-      v-model="materialData"
-      v-if="materialList.length > 0"
-      :rows="materialList"
+      :state="materialData"
+      class="space-y-2"
+      ref="subForm"
+      :validate="subFormValidate"
     >
-      <template #price_per_material-data="{ row }">
-        <UFormGroup
-          class="w-3/6"
-          :name="'price-' + row.id"
-          v-if="materialData.find((v) => v.id == row.id)"
-        >
-          <UInput
-            v-model="row.price_per_material"
-            type="number"
-            @change="handlePriceChange($event, row.id)"
+      <UTable
+        :columns="columns"
+        by="material_code"
+        v-model="materialData"
+        v-if="materialList.length > 0"
+        :rows="materialList"
+      >
+        <template #price_per_material-data="{ row }">
+          <UFormGroup
+            class="w-3/6"
+            :name="'price-' + row.id"
+            v-if="materialData.find((v) => v.id == row.id)"
           >
-            <template #leading> ￥ </template>
-          </UInput>
-        </UFormGroup>
-      </template>
-      <template #total_quantity-data="{ row }">
-        <UFormGroup
-          class="w-3/6"
-          :name="'quantity-' + row.id"
-          v-if="materialData.find((v) => v.id == row.id)"
-        >
-          <UInput
-            v-model="row.total_quantity"
-            type="number"
-            min="1"
-            @change="handleQuantityChange($event, row.id)"
+            <UInput
+              v-model="row.price_per_material"
+              type="number"
+              @change="handlePriceChange($event, row.id)"
+            >
+              <template #leading> ￥ </template>
+            </UInput>
+          </UFormGroup>
+        </template>
+        <template #total_quantity-data="{ row }">
+          <UFormGroup
+            class="w-3/6"
+            :name="'quantity-' + row.id"
+            v-if="materialData.find((v) => v.id == row.id)"
           >
-          </UInput>
-        </UFormGroup>
-      </template>
-    </UTable>
-  </UForm>
+            <UInput
+              v-model="row.total_quantity"
+              type="number"
+              min="1"
+              @change="handleQuantityChange($event, row.id)"
+            >
+            </UInput>
+          </UFormGroup>
+        </template>
+      </UTable>
+    </UForm>
   </UForm>
 </template>
 <script setup>
-// const props = defineProps({
-//   orderCode:{
-//     default:''
-//   }
-// })
+const props = defineProps({
+  originalData: {
+    default: null,
+  },
+});
 
 const state = reactive({
   productCode: null,
@@ -134,32 +137,71 @@ const materialData = ref([]);
 
 const bomStore = useBomStore();
 const form = ref(null);
-const subForm = ref(null)
+const subForm = ref(null);
 watch(
   () => state.productCode,
-  async (productCode) => {
+  async (productCode, preProductCode) => {
     if (productCode) {
       const _data = await bomStore.fetchBomByProductId(productCode);
       materialList.value = processMData(_data);
-      materialData.value = []
+      if (preProductCode) {
+        materialData.value = [];
+      } else {
+        if (
+          Array.isArray(props.originalData.materialData) &&
+          props.originalData.materialData.length > 0
+        ) {
+          props.originalData.materialData.map((item) => {
+            const _MDataIndex = materialList.value.findIndex(
+              (v) => v.material_code == item.material_code
+            );
+            if (_MDataIndex>-1) {
+              // const MIndex = materialData.value.findIndex(
+              //   (v2) => v2.material_code == item.material_code
+              // );
+              // if (MIndex == -1) {
+               
+
+              // } 
+              materialList.value[_MDataIndex]['price_per_material'] = item.price_per_material
+              materialList.value[_MDataIndex]['total_quantity']  = item.total_quantity
+              nextTick(()=>{
+                materialData.value.push(materialList.value[_MDataIndex]);
+              })
+           
+              updateTotalPrice(_MDataIndex)
+            }
+          });
+        }
+      }
     }
   }
 );
 
+if (props.originalData.orderCode) {
+  state.productCode = props.originalData.productCode;
+  state.quantity = props.originalData.quantity;
+  //  await nextTick()
+  //  materialData.value = props.originalData.materialData
+  //   console.log(materialData.value,'213123123')
+}
+
 const processMData = (data) => {
   const res = data.map((item) => {
-   const resItem =  {
+    const resItem = {
       id: randomEntry(),
       material_code: item.material_code,
       material_name: item.material.material_name,
       material_stock: item.material.stock,
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
-      price_per_material: bomStore.materialList[item.material_code]['price']||0,
-
+      price_per_material:
+        bomStore.materialList[item.material_code]["price"] || 0,
     };
-    resItem['total_price'] = resItem.total_quantity * resItem.price_per_material
-    return resItem
+    resItem["total_price"] =
+      resItem.total_quantity * resItem.price_per_material;
+
+    return resItem;
   });
   return res;
 };
@@ -185,9 +227,9 @@ const validate = async (state) => {
   if (state.quantity <= 0) {
     errors.push({ path: "quantity", message: "请输入正确数量" });
   }
-  if(materialData.value.length==0){
+  if (materialData.value.length == 0) {
     errors.push({
-      path: 'productCode',
+      path: "productCode",
       message: "请选择物料",
     });
   }
@@ -198,84 +240,82 @@ const validate = async (state) => {
 const geSubFormData = async () => {
   await form.value.validate();
   await subForm.value.validate();
-  return {...state,materialData:materialData.value};
+  return { ...state, materialData: materialData.value };
 };
-
 
 const subFormValidate = async (state) => {
   const errors = [];
 
-   for (const key in state) {
+  for (const key in state) {
     if (Object.hasOwnProperty.call(state, key)) {
       const element = state[key];
-      if(!element.total_quantity){
+      if (!element.total_quantity) {
         errors.push({
-          path: "quantity-"+element.id,
+          path: "quantity-" + element.id,
           message: "请输入数量",
         });
       }
-      if(!element.price_per_material){
+      if (!element.price_per_material) {
         errors.push({
-          path: "price-"+element.id,
+          path: "price-" + element.id,
           message: "请输入单价",
         });
       }
     }
-   }
-   console.log(errors,state,'errorssssssss1231231312312321')
+  }
+  console.log(errors, state, "errorssssssss1231231312312321");
   return errors;
 };
 
-
-const handleQuantityChange = (event,id)=>{
-  const Mindex  = materialList.value.findIndex(v=>v.id==id)
-  if(Mindex>-1){
-    nextTick(()=>{
-      updateTotalPrice(Mindex)
-    })
-   
+const handleQuantityChange = (event, id) => {
+  const Mindex = materialList.value.findIndex((v) => v.id == id);
+  if (Mindex > -1) {
+    nextTick(() => {
+      updateTotalPrice(Mindex);
+    });
   }
-}
-const handlePriceChange = (event,id)=>{
-  const Mindex  = materialList.value.findIndex(v=>v.id==id)
-  if(Mindex>-1){
-    nextTick(()=>{
-      bomStore.materialList[materialList.value[Mindex].material_code]['price'] = event.target.value
-      updateTotalPrice(Mindex)
-    })
-   
+};
+const handlePriceChange = (event, id) => {
+  const Mindex = materialList.value.findIndex((v) => v.id == id);
+  if (Mindex > -1) {
+    nextTick(() => {
+      bomStore.materialList[materialList.value[Mindex].material_code]["price"] =
+        event.target.value;
+      updateTotalPrice(Mindex);
+    });
   }
-}
+};
 
-const handleChangeQuantity  = (event)=>{
-for (const key in materialList.value) {
-  if (Object.hasOwnProperty.call(materialList.value, key)) {
-    materialList.value[key]['total_quantity'] =  materialList.value[key]['quantity_per_product']*event.target.value
-    updateTotalPrice(key)
+const handleChangeQuantity = (event) => {
+  for (const key in materialList.value) {
+    if (Object.hasOwnProperty.call(materialList.value, key)) {
+      materialList.value[key]["total_quantity"] =
+        materialList.value[key]["quantity_per_product"] * event.target.value;
+      updateTotalPrice(key);
+    }
   }
-}
-}
+};
 
-const updateTotalPrice = (index)=>{
-  materialList.value[index]['total_price'] = materialList.value[index]['total_quantity'] * materialList.value[index]['price_per_material']
-  console.log(materialData.value,'44444444')
-}
-
+const updateTotalPrice = (index) => {
+  materialList.value[index]["total_price"] =
+    materialList.value[index]["total_quantity"] *
+    materialList.value[index]["price_per_material"];
+};
 
 watch(
-  ()=>bomStore.materialList,
-  (state) => {
+  () => bomStore.materialList,
+  (_state) => {
     //更新价格
-    materialList.value.map((item,index)=>{
-      materialList.value[index].price_per_material = state[item.material_code]['price']||0
-      updateTotalPrice(index)
-    })
+    materialList.value.map((item, index) => {
+      materialList.value[index].price_per_material =
+        _state[item.material_code]["price"] ||  materialList.value[index].price_per_material ||0; 
+      updateTotalPrice(index);
+    });
   },
   {
-    deep:true
+    deep: true,
   }
-)
-
+);
 
 // watch(
 //   materialList,
@@ -289,7 +329,6 @@ watch(
 //     deep:true
 //   }
 // )
-
 
 defineExpose({
   geSubFormData,

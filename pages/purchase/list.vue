@@ -16,7 +16,7 @@
       {{ $dayjs(row.created_at).format("YYYY-MM-DD HH:mm:ss") }}
     </template>
     <template #action-data="{ row }">
-      <UButton @click="handleEdit(row.purchase_id)">编辑</UButton>
+      <UButton @click="handleEdit(row.purchase_code)">编辑</UButton>
     </template>
   </UTable>
   <div
@@ -83,7 +83,7 @@ const handleEdit =async (id)=>{
   await navigateTo({
     path: '/purchase/order',
     query: {
-      prucahse_id:id
+      purchase_code:id
     }
 })
 
