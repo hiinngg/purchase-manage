@@ -23,9 +23,7 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{
-                product.product_name
-              }}</span
+              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
             >
           </template>
         </USelectMenu>
@@ -57,17 +55,26 @@
       >
         <template #price_per_material-data="{ row }">
           <UFormGroup
-            class="w-3/6"
+            class="w-full"
             :name="'price-' + row.id"
             v-if="materialData.find((v) => v.id == row.id)"
           >
-            <UInput
+            <!-- <UInput
               v-model="row.price_per_material"
               type="number"
               @change="handlePriceChange($event, row.id)"
-            >
-              <template #leading> ￥ </template>
-            </UInput>
+            > -->
+              <USelectMenu
+              class="w-[200px]"
+                v-model="row.price_per_material"
+                by="unit_price"
+                option-attribute="unit_price"
+                :options="row.historical_prices"
+                creatable
+                searchable
+              />
+              <!-- <template #leading> ￥ </template> -->
+            <!-- </UInput> -->
           </UFormGroup>
         </template>
         <template #total_quantity-data="{ row }">
@@ -155,21 +162,21 @@ watch(
             const _MDataIndex = materialList.value.findIndex(
               (v) => v.material_code == item.material_code
             );
-            if (_MDataIndex>-1) {
+            if (_MDataIndex > -1) {
               // const MIndex = materialData.value.findIndex(
               //   (v2) => v2.material_code == item.material_code
               // );
               // if (MIndex == -1) {
-               
 
-              // } 
-              materialList.value[_MDataIndex]['price_per_material'] = item.price_per_material
-              materialList.value[_MDataIndex]['total_quantity']  = item.total_quantity
-              nextTick(()=>{
+              // }
+              materialList.value[_MDataIndex]["price_per_material"] =
+                item.price_per_material;
+              materialList.value[_MDataIndex]["total_quantity"] = item.total_quantity;
+              nextTick(() => {
                 materialData.value.push(materialList.value[_MDataIndex]);
-              })
-           
-              updateTotalPrice(_MDataIndex)
+              });
+
+              updateTotalPrice(_MDataIndex);
             }
           });
         }
@@ -191,15 +198,18 @@ const processMData = (data) => {
     const resItem = {
       id: randomEntry(),
       material_code: item.material_code,
-      material_name: item.material.material_name,
-      material_stock: item.material.stock,
+      material_name:
+        bomStore.materialList[item.material_code]["material_details"].material_name,
+      material_stock: bomStore.materialList[item.material_code]["inventory_quantity"],
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
       price_per_material:
-        bomStore.materialList[item.material_code]["price"] || 0,
+        bomStore.materialList[item.material_code]["historical_prices"]?.[0]?.[
+          "unit_price"
+        ],
+      historical_prices: bomStore.materialList[item.material_code]["historical_prices"],
     };
-    resItem["total_price"] =
-      resItem.total_quantity * resItem.price_per_material;
+    resItem["total_price"] = resItem.total_quantity * resItem.price_per_material;
 
     return resItem;
   });
@@ -308,7 +318,9 @@ watch(
     //更新价格
     materialList.value.map((item, index) => {
       materialList.value[index].price_per_material =
-        _state[item.material_code]["price"] ||  materialList.value[index].price_per_material ||0; 
+        _state[item.material_code]["price"] ||
+        materialList.value[index].price_per_material ||
+        0;
       updateTotalPrice(index);
     });
   },

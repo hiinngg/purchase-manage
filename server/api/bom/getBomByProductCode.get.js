@@ -10,10 +10,11 @@ export default eventHandler(async (event) => {
           message: '产品编码不能为空',
         })
       }
-      const { data } = await client.from('bom').select('*, material(*)').eq('product_code',query.productCode)
+      const { data } = await client.from('bom').select('*').eq('product_code',query.productCode)
       return data
 
   } catch (error) {
     throw createError(uncaughtError);
   }
+
 });

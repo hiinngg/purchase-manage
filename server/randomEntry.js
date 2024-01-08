@@ -1,6 +1,8 @@
 
-export default function randomEntry(randomLength=5){
-  return Number(
-    Math.random().toString().substr(2, randomLength) + Date.now()
-  ).toString(36);
+export default function randomEntry(pre='',randomLength=5){
+  var result = pre;
+  for(var i = 0; i < randomLength; i++) {
+      result += Math.floor(Math.random() * 10).toString();
+  }
+  return result;
 }

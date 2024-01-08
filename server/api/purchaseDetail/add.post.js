@@ -14,7 +14,7 @@ export default eventHandler(async (event) => {
         order_codes:item.orderCodes,
       };
     });
-    const { error } = await client.from("price").insert(arr);
+    const { error } = await client.from("purchase_detail").insert(arr);
     if (!error) {
       return { statusCode: 201, message: "操作成功" };
     } else {

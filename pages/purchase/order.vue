@@ -10,24 +10,16 @@
     class="w-full pb-8 px-8"
     style="overflow-y: auto; height: 100%"
   >
-    <UButton v-if="!route.query.purchase_code" class="mb-8" @click="handleAdd">增加订单</UButton>
-    <UButton
-      class="mb-8 ml-2"
-      @click="handleCompute(false)"
-      :loading="computeLoading"
+    <UButton v-if="!route.query.purchase_code" class="mb-8" @click="handleAdd"
+      >增加订单</UButton
+    >
+    <UButton class="mb-8 ml-2" @click="handleCompute(false)" :loading="computeLoading"
       >汇总计算</UButton
     >
-    <UButton
-      class="mb-8 ml-4"
-      :loading="computeLoading"
-      @click="handleCompute(true)"
+    <UButton class="mb-8 ml-4" :loading="computeLoading" @click="handleCompute(true)"
       >保存</UButton
     >
-    <div
-      v-for="(item, index) in purchaseList"
-      :key="item.id"
-      class="p-4 shadow-lg"
-    >
+    <div v-for="(item, index) in purchaseList" :key="item.id" class="p-4 shadow-lg">
       <div class="relative pb-4">
         <UButton
           v-if="!item.purchase_id"
@@ -53,12 +45,7 @@
   >
     <UButton class="mb-8" @click="handleBack">返回订单列表</UButton>
 
-    <UForm
-      :state="materialData"
-      class="space-y-2"
-      ref="form"
-      :validate="validate"
-    >
+    <UForm :state="materialData" class="space-y-2" ref="form" :validate="validate">
       <UTable :columns="columns" :rows="materialData">
         <template #orderCodes-data="{ row }">
           <span>{{ getOrderCodes(row.orderCodes) }}</span>
@@ -92,7 +79,7 @@ onMounted(async () => {
 const purchaseList = ref([]);
 const computeLoading = ref(false);
 const purchaseForm = ref([]);
-const router = useRouter()
+const router = useRouter();
 const route = useRoute();
 if (route.query.purchase_code) {
   //进入编辑模式
@@ -180,46 +167,31 @@ const handleCompute = async (whetherSave = false) => {
     }
 
     materialData.value = processOrderList(_data);
-    console.log(
-      materialData.value,
-      whetherSave,
-      _data,
-      "compute data=========>"
-    );
+    console.log(materialData.value, whetherSave, _data, "compute data=========>");
     if (!whetherSave) {
       toast.add({ title: "操作成功" });
       whetherResult.value = true;
       computeLoading.value = false;
     } else {
-      let url = "/api/purchase/add";
-      if (!route.query.purchase_code) {
-        // //保存价格
-        // const { data: data1, error: error1 } = await useFetch(
-        //   "/api/price/add",
-        //   {
-        //     method: "post",
-        //     body: {
-        //       data: materialData.value.map((v) => ({
-        //         ...v,
-        //         orderCodes: Array.from(v.orderCodes).join("，"),
-        //       })),
-        //     },
-        //     watch: false,
-        //   }
-        // );
-      } else {
-        url = "/api/purchase/edit";
-      }
+      let url = "/api/purchase/addOrUpdate";
 
       //保存采购订单
       const { data, error, status } = await useFetch(url, {
         method: "post",
-        body: { data: _data },
+        body: {
+          data: {
+            purchaseData: _data,
+            purchaseDetailData: materialData.value.map((v) => ({
+              ...v,
+              orderCodes: Array.from(v.orderCodes).join("，"),
+            })),
+          },
+        },
         watch: false,
       });
       if (data.value.statusCode == "201") {
         toast.add({ title: "操作成功" });
-        router.go(-1)
+        router.go(-1);
       } else {
         const errprMsg = error?.value?.data || { message: "未知错误" };
         toast.add({
@@ -362,8 +334,7 @@ const processOrderList = (originalData) => {
                   materialData[index]["total_price"] + materialItem.total_price;
 
                 materialData[index]["total_quantity"] =
-                  materialData[index]["total_quantity"] +
-                  materialItem.total_quantity;
+                  materialData[index]["total_quantity"] + materialItem.total_quantity;
 
                 materialData[index]["orderCodes"].add(element.orderCode);
               }

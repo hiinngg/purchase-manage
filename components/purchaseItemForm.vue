@@ -7,18 +7,18 @@
     @submit="onSubmit"
   >
     <UFormGroup class="mt-2 w-3/5" label="销售订单编号" name="orderCode">
-      <UInput size="xl" :disabled="props.originalData.purchase_id"   v-model="state.orderCode" autocomplete="off" />
+      <UInput
+        size="xl"
+        :disabled="props.originalData.purchase_id"
+        v-model="state.orderCode"
+        autocomplete="off"
+      />
     </UFormGroup>
     <UFormGroup class="mt-2" label="订单明细" name="products">
       <UButton @click="addOrderDetail">增加订单明细</UButton>
-      <template v-for="(item, index) in orderDetailList">
-        <div class="flex mt-2 items-start">
-          <OrderItemFrom
-            :originalData="item"
-            :key="item.id"
-            ref="orderItem"
-            class="w-4/5"
-          />
+      <template v-for="(item, index) in orderDetailList" :key="item.id">
+        <div class="flex mt-2 items-start" >
+          <OrderItemFrom :originalData="item" ref="orderItem" class="w-4/5"  />
           <UButton
             @click="handleDel(index)"
             :padded="false"
@@ -26,14 +26,14 @@
             color="red"
             icon="i-heroicons-minus"
           />
-          <UButton
+          <!-- <UButton
             :id="item.id"
             icon="i-heroicons-magnifying-glass-16-solid"
             :dynamic="true"
             :padded="false"
             color="primary"
             class="ml-2"
-          ></UButton>
+          ></UButton> -->
         </div>
       </template>
     </UFormGroup>
