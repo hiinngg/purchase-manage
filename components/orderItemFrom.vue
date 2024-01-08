@@ -1,7 +1,7 @@
 <template>
   <UForm
     :state="state"
-    class="space-y-2"
+    class="space-y-2 relative"
     ref="form"
     :validateOn="['input', 'submit']"
     :validate="validate"
@@ -23,7 +23,9 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
+              >编码：{{ product.product_code }}——名称：{{
+                product.product_name
+              }}</span
             >
           </template>
         </USelectMenu>
@@ -49,13 +51,14 @@
       <UTable
         :columns="columns"
         by="material_code"
+        class=""
         v-model="materialData"
         v-if="materialList.length > 0"
         :rows="materialList"
       >
         <template #price_per_material-data="{ row }">
           <UFormGroup
-            class="w-full"
+     
             :name="'price-' + row.id"
             v-if="materialData.find((v) => v.id == row.id)"
           >
@@ -64,16 +67,26 @@
               type="number"
               @change="handlePriceChange($event, row.id)"
             > -->
+      
               <USelectMenu
-              class="w-[200px]"
+                class="h-[60px] max-h-[60px]"
+  
                 v-model="row.price_per_material"
                 by="unit_price"
                 option-attribute="unit_price"
-                :options="row.historical_prices"
+                :options="
+                  bomStore.materialList[row.material_code]['historical_prices']
+                "
                 creatable
                 searchable
+                searchablePlaceholder="搜索历史单价..."
+                @change="handlePriceChange($event, row.id)"
+                :popper="{
+                 // placement: 'top-end',
+                }"
               />
-              <!-- <template #leading> ￥ </template> -->
+
+            <!-- <template #leading> ￥ </template> -->
             <!-- </UInput> -->
           </UFormGroup>
         </template>
@@ -171,7 +184,8 @@ watch(
               // }
               materialList.value[_MDataIndex]["price_per_material"] =
                 item.price_per_material;
-              materialList.value[_MDataIndex]["total_quantity"] = item.total_quantity;
+              materialList.value[_MDataIndex]["total_quantity"] =
+                item.total_quantity;
               nextTick(() => {
                 materialData.value.push(materialList.value[_MDataIndex]);
               });
@@ -199,17 +213,21 @@ const processMData = (data) => {
       id: randomEntry(),
       material_code: item.material_code,
       material_name:
-        bomStore.materialList[item.material_code]["material_details"].material_name,
-      material_stock: bomStore.materialList[item.material_code]["inventory_quantity"],
+        bomStore.materialList[item.material_code]["material_details"]
+          .material_name,
+      material_stock:
+        bomStore.materialList[item.material_code]["inventory_quantity"],
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
       price_per_material:
         bomStore.materialList[item.material_code]["historical_prices"]?.[0]?.[
           "unit_price"
         ],
-      historical_prices: bomStore.materialList[item.material_code]["historical_prices"],
+      historical_prices:
+        bomStore.materialList[item.material_code]["historical_prices"],
     };
-    resItem["total_price"] = resItem.total_quantity * resItem.price_per_material;
+    resItem["total_price"] =
+      resItem.total_quantity * resItem.price_per_material;
 
     return resItem;
   });
@@ -273,7 +291,6 @@ const subFormValidate = async (state) => {
       }
     }
   }
-  console.log(errors, state, "errorssssssss1231231312312321");
   return errors;
 };
 
@@ -289,8 +306,18 @@ const handlePriceChange = (event, id) => {
   const Mindex = materialList.value.findIndex((v) => v.id == id);
   if (Mindex > -1) {
     nextTick(() => {
-      bomStore.materialList[materialList.value[Mindex].material_code]["price"] =
-        event.target.value;
+      const arr =
+        bomStore.materialList[materialList.value[Mindex].material_code][
+          "historical_prices"
+        ];
+      if (!arr.find((v) => v.unit_price == event.unit_price)) {
+        bomStore.materialList[materialList.value[Mindex].material_code][
+          "historical_prices"
+        ].unshift({
+          unit_price: event.unit_price,
+        });
+      }
+
       updateTotalPrice(Mindex);
     });
   }
@@ -318,7 +345,7 @@ watch(
     //更新价格
     materialList.value.map((item, index) => {
       materialList.value[index].price_per_material =
-        _state[item.material_code]["price"] ||
+        _state[item.material_code]["historical_prices"][0]["unit_price"] ||
         materialList.value[index].price_per_material ||
         0;
       updateTotalPrice(index);
