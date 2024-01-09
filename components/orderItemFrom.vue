@@ -23,9 +23,7 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{
-                product.product_name
-              }}</span
+              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
             >
           </template>
         </USelectMenu>
@@ -42,7 +40,13 @@
         />
       </UFormGroup>
     </div>
+    <div v-if="state.productCode && materialList.length==0" class="space-y-2">
+    <USkeleton class="h-4 w-4/5" />
+    <USkeleton class="h-4 w-3/5" />
+    <USkeleton class="h-4 w-2/5" />
+  </div>
     <UForm
+     v-else
       :state="materialData"
       class="space-y-2"
       ref="subForm"
@@ -58,7 +62,6 @@
       >
         <template #price_per_material-data="{ row }">
           <UFormGroup
-     
             :name="'price-' + row.id"
             v-if="materialData.find((v) => v.id == row.id)"
           >
@@ -67,24 +70,27 @@
               type="number"
               @change="handlePriceChange($event, row.id)"
             > -->
-      
-              <USelectMenu
-                class="h-[60px] max-h-[60px]"
-  
-                v-model="row.price_per_material"
-                by="unit_price"
-                option-attribute="unit_price"
-                :options="
-                  bomStore.materialList[row.material_code]['historical_prices']
-                "
-                creatable
-                searchable
-                searchablePlaceholder="搜索历史单价..."
-                @change="handlePriceChange($event, row.id)"
-                :popper="{
-                 // placement: 'top-end',
-                }"
-              />
+
+            <USelectMenu
+              class="w-[200px]"
+              v-model="row.price_per_material"
+              by="unit_price"
+              option-attribute="unit_price"
+              :options="bomStore.materialList[row.material_code]['historical_prices']"
+              creatable
+              showCreateOptionWhen="always"
+              searchable
+              clearSearchOnClose
+              searchablePlaceholder="搜索历史单价..."
+              @change="handlePriceChange($event, row.id)"
+              :popper="{ strategy: 'fixed' }"
+              :uiMenu="{ width: ' w-1/4', popper: {} }"
+            >
+              <template #option-create="{ option }">
+                <span class="flex-shrink-0">创建新单价：</span>
+                <span class="block truncate">{{ option.unit_price || option }}</span>
+              </template>
+            </USelectMenu>
 
             <!-- <template #leading> ￥ </template> -->
             <!-- </UInput> -->
@@ -154,10 +160,10 @@ const columns = [
 
 const materialList = ref([]);
 const materialData = ref([]);
-
 const bomStore = useBomStore();
 const form = ref(null);
 const subForm = ref(null);
+
 watch(
   () => state.productCode,
   async (productCode, preProductCode) => {
@@ -184,8 +190,7 @@ watch(
               // }
               materialList.value[_MDataIndex]["price_per_material"] =
                 item.price_per_material;
-              materialList.value[_MDataIndex]["total_quantity"] =
-                item.total_quantity;
+              materialList.value[_MDataIndex]["total_quantity"] = item.total_quantity;
               nextTick(() => {
                 materialData.value.push(materialList.value[_MDataIndex]);
               });
@@ -213,21 +218,17 @@ const processMData = (data) => {
       id: randomEntry(),
       material_code: item.material_code,
       material_name:
-        bomStore.materialList[item.material_code]["material_details"]
-          .material_name,
-      material_stock:
-        bomStore.materialList[item.material_code]["inventory_quantity"],
+        bomStore.materialList[item.material_code]["material_details"].material_name,
+      material_stock: bomStore.materialList[item.material_code]["inventory_quantity"],
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
       price_per_material:
         bomStore.materialList[item.material_code]["historical_prices"]?.[0]?.[
           "unit_price"
         ],
-      historical_prices:
-        bomStore.materialList[item.material_code]["historical_prices"],
+      historical_prices: bomStore.materialList[item.material_code]["historical_prices"],
     };
-    resItem["total_price"] =
-      resItem.total_quantity * resItem.price_per_material;
+    resItem["total_price"] = resItem.total_quantity * resItem.price_per_material;
 
     return resItem;
   });
@@ -303,19 +304,26 @@ const handleQuantityChange = (event, id) => {
   }
 };
 const handlePriceChange = (event, id) => {
+  const price = typeof event == 'string'? event:event.unit_price
   const Mindex = materialList.value.findIndex((v) => v.id == id);
   if (Mindex > -1) {
+    bomStore.materialList[materialList.value[Mindex].material_code]['price_per_material'] = price
     nextTick(() => {
       const arr =
         bomStore.materialList[materialList.value[Mindex].material_code][
           "historical_prices"
         ];
-      if (!arr.find((v) => v.unit_price == event.unit_price)) {
+      if (!arr.find((v) => v.unit_price == price)) {
         bomStore.materialList[materialList.value[Mindex].material_code][
           "historical_prices"
         ].unshift({
-          unit_price: event.unit_price,
+          unit_price: price,
         });
+
+    
+
+
+
       }
 
       updateTotalPrice(Mindex);
@@ -342,10 +350,10 @@ const updateTotalPrice = (index) => {
 watch(
   () => bomStore.materialList,
   (_state) => {
-    //更新价格
+    //更新价格c
     materialList.value.map((item, index) => {
       materialList.value[index].price_per_material =
-        _state[item.material_code]["historical_prices"][0]["unit_price"] ||
+        _state[item.material_code]['price_per_material'] ||
         materialList.value[index].price_per_material ||
         0;
       updateTotalPrice(index);

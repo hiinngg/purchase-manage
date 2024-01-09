@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: false },
-  modules: ['@pinia/nuxt','@nuxt/ui','@nuxtjs/supabase','dayjs-nuxt'],
+  modules: ['@pinia/nuxt','@nuxt/ui-edge','@nuxtjs/supabase','dayjs-nuxt'],
   supabase:{
     redirect:false
   },

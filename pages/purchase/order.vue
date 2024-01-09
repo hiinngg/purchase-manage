@@ -69,7 +69,8 @@
 <script setup>
 const toast = useToast();
 const productStore = useProductStore();
-
+const bomStore = useBomStore();
+bomStore.$reset()
 const editModeLoading = ref(false);
 
 onMounted(async () => {
@@ -102,7 +103,6 @@ const whetherResult = ref(false);
 const form = ref(null);
 const materialData = ref([]);
 
-const bomStore = useBomStore();
 
 const columns = [
   {
@@ -191,6 +191,7 @@ const handleCompute = async (whetherSave = false) => {
       });
       if (data.value.statusCode == "201") {
         toast.add({ title: "操作成功" });
+
         router.go(-1);
       } else {
         const errprMsg = error?.value?.data || { message: "未知错误" };

@@ -18,7 +18,8 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
-    "@nuxt/ui": "^2.11.1",
+    "@nuxt/ui": "npm:@nuxt/ui-edge@latest",
+    "@nuxt/ui-edge": "^2.11.1-28412191.6154ae9",
     "@pinia/nuxt": "^0.5.1",
     "pinia": "^2.1.7",
     "supabase": "^1.127.4"
