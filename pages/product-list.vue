@@ -61,7 +61,7 @@
   </UModal> -->
   <UModal v-model="isbomFormOpen" preventClose>
     <UCard>
-      <template #header> 新增BOM</template>
+      <template #header> {{ currentProductId?'编辑':'新增' }}BOM</template>
       <BomForm :productId="currentProductId"  @operClose="isbomFormOpen = false" @operSuccess="handleSuccess"></BomForm>
     </UCard>
   </UModal>
@@ -158,6 +158,12 @@ watch(page, () => {
   fetch();
 });
 
+
+watch(isbomFormOpen,(state)=>{
+  if(!state){
+    currentProductId.value = null
+  }
+})
 </script>
 <style lang="scss">
 </style>

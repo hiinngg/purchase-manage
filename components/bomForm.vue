@@ -1,6 +1,6 @@
 <template>
   <UForm ref="form" :validate="validate" :state="state" class="space-y-4 w-full pb-36">
-    <ProductForm ref="productFormRef" :originalData="originnalData"  @operSuccess="isOpen = false"></ProductForm>
+    <ProductForm ref="productFormRef" :originalData="originalData"  @operSuccess="isOpen = false"></ProductForm>
     <!-- <USelectMenu
         v-model="state.productCode"
         :loading="selLoading"
@@ -74,7 +74,7 @@ const props = defineProps({
   },
 });
 
-const originnalData = ref(null)
+const originalData = ref(null)
 const toast = useToast();
 
 const selLoading = ref(true);
@@ -91,7 +91,7 @@ const state = reactive({
   materiaCodes: [],
 });
 
-// const productStore = useProductStore()
+const productStore = useProductStore()
 // const productList = await productStore.fetchProduct();
 // toRef(productList)
 
@@ -147,6 +147,7 @@ async function onSubmit(postData) {
       watch: false,
     });
     if (data.value.statusCode == "201") {
+      productStore.$reset()
       toast.add({ title: "操作成功" });
       emits("operSuccess");
     } else {
@@ -187,10 +188,9 @@ watch(
       const data = await $fetch("/api/product/detail", {
         query: { product_id: productId },
       });
-      console.log(data,'212323213')
-      originnalData.value = data
       nextTick(()=>{
-        bomItemList.value = Array.isArray(data.bom)
+        originalData.value = data
+        bomItemList.value = Array.isArray(data.bom)?data.bom:[]
       })
 
     }
