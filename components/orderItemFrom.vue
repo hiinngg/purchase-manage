@@ -154,6 +154,10 @@ const columns = [
     label: "物料名称",
   },
   {
+    key: "material_model",
+    label: "物料规格",
+  },
+  {
     key: "material_stock",
     label: "物料库存",
   },
@@ -185,10 +189,14 @@ watch(
   () => state.productCode,
   async (productCode, preProductCode) => {
     if (productCode) {
+      materialList.value = []
       const _data = await bomStore.fetchBomByProductId(productCode);
       materialList.value = processMData(_data);
       if (preProductCode) {
-        materialData.value = [];
+        nextTick(()=>{
+          materialData.value = [];
+        })
+     
       } else {
         if (
           Array.isArray(props.originalData.materialData) &&
