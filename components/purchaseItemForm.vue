@@ -18,7 +18,7 @@
       <UButton @click="addOrderDetail">增加订单明细</UButton>
       <template v-for="(item, index) in orderDetailList" :key="item.id">
         <div class="flex mt-2 items-start" >
-          <OrderItemFrom :originalData="item" ref="orderItem" class="w-4/5"  />
+          <OrderItemFrom :originalData="item" ref="orderItem" class="w-full"  />
           <UButton
             @click="handleDel(index)"
             :padded="false"

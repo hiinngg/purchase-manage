@@ -60,21 +60,30 @@
         v-if="materialList.length > 0"
         :rows="materialList"
       >
+        <template #material_model-data="{ row }">
+          <UPopover mode="hover">
+            <UButton
+              color="white"
+              label="规格"
+            />
+
+            <template #panel>
+              <div class="p-2">{{ row.material_model }}</div>
+            </template>
+          </UPopover>
+        </template>
         <template #price_per_material-data="{ row }">
           <UFormGroup
             :name="'price-' + row.id"
             v-if="materialData.find((v) => v.id == row.id)"
           >
-         
-
             <USelectMenu
-              
               class="w-[200px]"
               v-model="row.price_per_material"
               by="unit_price"
               option-attribute="unit_price"
               :options="
-                bomStore.materialList?.[row.material_code]?.['historical_prices'] ||[]
+                bomStore.materialList?.[row.material_code]?.['historical_prices'] || []
               "
               creatable
               showCreateOptionWhen="always"
@@ -87,9 +96,7 @@
             >
               <template #option-create="{ option }">
                 <span class="flex-shrink-0">创建新单价：</span>
-                <span class="block truncate">{{
-                  option.unit_price || option
-                }}</span>
+                <span class="block truncate">{{ option.unit_price || option }}</span>
               </template>
             </USelectMenu>
             <!-- <UInput
@@ -189,14 +196,13 @@ watch(
   () => state.productCode,
   async (productCode, preProductCode) => {
     if (productCode) {
-      materialList.value = []
+      materialList.value = [];
       const _data = await bomStore.fetchBomByProductId(productCode);
       materialList.value = processMData(_data);
       if (preProductCode) {
-        nextTick(()=>{
+        nextTick(() => {
           materialData.value = [];
-        })
-     
+        });
       } else {
         if (
           Array.isArray(props.originalData.materialData) &&
@@ -242,15 +248,17 @@ const processMData = (data) => {
     const resItem = {
       id: randomEntry(),
       material_code: item.material_code,
+      material_model: bomStore.materialList[item.material_code]["material_details"].material_model,
       material_name:
         bomStore.materialList[item.material_code]["material_details"].material_name,
-      material_stock: bomStore.materialList[item.material_code]["inventory_quantity"] ||0,
+      material_stock:
+        bomStore.materialList[item.material_code]["inventory_quantity"] || 0,
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
       price_per_material:
         bomStore.materialList[item.material_code]["historical_prices"]?.[0]?.[
           "unit_price"
-        ]||0,
+        ] || 0,
       historical_prices: bomStore.materialList[item.material_code]["historical_prices"],
     };
     resItem["total_price"] = resItem.total_quantity * resItem.price_per_material;
