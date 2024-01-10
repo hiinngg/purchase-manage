@@ -22,7 +22,11 @@
             body: { materialCodes:insertMaterialCodes },
           });
           _materialList.map((v)=>{
-            this.materialList[v.material_code] = v
+            let item = v
+            if(!item.historical_prices){
+              item.historical_prices = []
+            }
+            this.materialList[v.material_code] = item
           })
         }
   

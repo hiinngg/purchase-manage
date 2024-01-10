@@ -1,4 +1,5 @@
 <template>
+  <div>
  <UForm :schema="schema" :state="state" class="flex items-start space-x-4" :validate="validate"  ref="form">
     <UFormGroup  name="materialCode" class="w-2/3">
           <USelectMenu
@@ -14,19 +15,27 @@
         :search-attributes="['material_code', 'material_name']"
       >
         <template #option="{ option: material }">
+          <div>
           <span class="truncate"
-            >编码：{{ material.material_code }}——名称：{{ material.material_name }}</span
+            >编码：{{ material.material_code }}</span
           >
+          <div class="block mt-2">名称：{{ material?.material_name }}</div>
+          <div class="block mt-2">型号：{{ material?.material_model }}</div>
+          </div>
         </template>
       </USelectMenu>
+    
     </UFormGroup>
 
     <UFormGroup  name="quantity" class="w-1/3" >
         <UInput autocomplete="off" type="number" v-model="state.quantity"   placeholder="数量" />
     </UFormGroup>
-
+    
   </UForm>
+  
+  </div>
 </template>
+
 <script setup>
 const props = defineProps({
     data:{

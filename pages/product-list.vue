@@ -21,6 +21,9 @@
     <template #created_at-data="{ row }">
       {{ $dayjs(row.created_at).format("YYYY-MM-DD HH:mm:ss") }}
     </template> -->
+    <template #created_at-data="{ row }">
+      {{ $dayjs(row.created_at).format("YYYY-MM-DD HH:mm:ss") }}
+    </template>
     <template #action-data="{ row }">
       <UButton @click="handleEdit(row.product_id)">编辑</UButton>
     </template>
@@ -62,7 +65,7 @@
       <BomForm  @operClose="isbomFormOpen = false" @operSuccess="isbomFormOpen = false"></BomForm>
     </UCard>
   </UModal> -->
-  <UModal v-model="isbomFormOpen" preventClose>
+  <UModal v-model="isbomFormOpen" fullscreen preventClose>
     <UCard>
       <template #header> {{ currentProductId?'编辑':'新增' }}BOM</template>
       <BomForm :productId="currentProductId"  @operClose="isbomFormOpen = false" @operSuccess="handleSuccess"></BomForm>

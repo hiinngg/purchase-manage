@@ -12,9 +12,9 @@
           v-model="state.productCode"
           :loading="selLoading"
           searchable
-          searchable-placeholder="查询产品编码"  
+          searchable-placeholder="查询产品编码"
           class="w-full"
-          placeholder="选择产品编码" 
+          placeholder="选择产品编码"
           :options="productOriginalList"
           option-attribute="product_name"
           label-attribute="product_code"
@@ -23,9 +23,7 @@
         >
           <template #option="{ option: product }">
             <span class="truncate"
-              >编码：{{ product.product_code }}——名称：{{
-                product.product_name
-              }}</span
+              >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
             >
           </template>
         </USelectMenu>
@@ -67,19 +65,16 @@
             :name="'price-' + row.id"
             v-if="materialData.find((v) => v.id == row.id)"
           >
-            <!-- <UInput
-              v-model="row.price_per_material"
-              type="number"
-              @change="handlePriceChange($event, row.id)"
-            > -->
+         
 
             <USelectMenu
+              
               class="w-[200px]"
               v-model="row.price_per_material"
               by="unit_price"
               option-attribute="unit_price"
               :options="
-                bomStore.materialList[row.material_code]['historical_prices']
+                bomStore.materialList?.[row.material_code]?.['historical_prices'] ||[]
               "
               creatable
               showCreateOptionWhen="always"
@@ -97,6 +92,22 @@
                 }}</span>
               </template>
             </USelectMenu>
+            <!-- <UInput
+            v-else
+              v-model="row.price_per_material"
+              type="number"
+              @change="handlePriceChange($event, row.id)"
+            /> -->
+            <!-- <UInputMenu
+              class="w-[200px]"
+              option-attribute="unit_price"
+              by="unit_price"
+              v-model="row.price_per_material"
+              @change="handlePriceChange($event, row.id)"
+              searchablePlaceholder="搜索历史单价..."
+              searchable
+              :options="bomStore?.materialList?.[row.material_code]?.['historical_prices'] || []"
+            /> -->
 
             <!-- <template #leading> ￥ </template> -->
             <!-- </UInput> -->
@@ -196,8 +207,7 @@ watch(
               // }
               materialList.value[_MDataIndex]["price_per_material"] =
                 item.price_per_material;
-              materialList.value[_MDataIndex]["total_quantity"] =
-                item.total_quantity;
+              materialList.value[_MDataIndex]["total_quantity"] = item.total_quantity;
               nextTick(() => {
                 materialData.value.push(materialList.value[_MDataIndex]);
               });
@@ -225,21 +235,17 @@ const processMData = (data) => {
       id: randomEntry(),
       material_code: item.material_code,
       material_name:
-        bomStore.materialList[item.material_code]["material_details"]
-          .material_name,
-      material_stock:
-        bomStore.materialList[item.material_code]["inventory_quantity"],
+        bomStore.materialList[item.material_code]["material_details"].material_name,
+      material_stock: bomStore.materialList[item.material_code]["inventory_quantity"] ||0,
       quantity_per_product: item.quantity,
       total_quantity: state.quantity ? item.quantity * state.quantity : 0,
       price_per_material:
         bomStore.materialList[item.material_code]["historical_prices"]?.[0]?.[
           "unit_price"
-        ],
-      historical_prices:
-        bomStore.materialList[item.material_code]["historical_prices"],
+        ]||0,
+      historical_prices: bomStore.materialList[item.material_code]["historical_prices"],
     };
-    resItem["total_price"] =
-      resItem.total_quantity * resItem.price_per_material;
+    resItem["total_price"] = resItem.total_quantity * resItem.price_per_material;
 
     return resItem;
   });
