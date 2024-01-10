@@ -10,7 +10,7 @@ export default eventHandler(async (event) => {
           message: '产品id不能为空',
         })
       }
-      const { data } = await client.from('product').select('*,bom(material(*))').eq('product_id',query.product_id).single()
+      const { data } = await client.from('product').select('*,bom(*)').eq('product_id',query.product_id).single()
       return data
 
   } catch (error) {

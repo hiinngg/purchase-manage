@@ -8,7 +8,7 @@
     @submit="onSubmit"
   >
     <UFormGroup class="mt-2" label="产品编号" name="productCode">
-      <UInput v-model="state.productCode" autocomplete="off" />
+      <UInput :disabled="props.originalData.product_id" v-model="state.productCode" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="产品名称" name="productName">
       <UInput v-model="state.productName" autocomplete="off" />

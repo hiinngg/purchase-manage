@@ -2,7 +2,10 @@
      <!-- <UButton class="my-8" @click="handleClick">新增产品</UButton>
     <UButton class="my-8 ml-2" @click="handleMaterialClick">新增物料</UButton> -->
     <UButton class="my-8 ml-2" @click="handleBomClick">新增bom</UButton>
-
+    <div class="flex items-center mb-2">
+      <UInput class="w-1/3" v-model="query.product_code" placeholder="查询产品编码" />
+      <UButton class="ml-2" @click="fetch">查询</UButton>
+    </div>
     <UTable
     :loading="loading"
     :loading-state="{
@@ -27,7 +30,7 @@
   >
     <UPagination
       v-if="data.total"
-      v-model="page"
+      v-model="query.page"
       :page-count="5"
       :total="data.total"
     />
@@ -70,8 +73,10 @@
 
 const isbomFormOpen = ref(false);
 const loading = ref(false)
-const page = ref(1);
-
+const query = reactive({
+  page:1,
+  product_code:''
+})
 const data = ref({
   productList:[],
   total:0,
@@ -122,9 +127,7 @@ onMounted(() => {
 const fetch = async (force = false) => {
   loading.value = true
   const res = await $fetch("/api/product/list", {
-    query: {
-      page_num: page.value,
-    },
+    query,
   });
   data.value = res;
   loading.value = false
@@ -154,7 +157,7 @@ const handleSuccess = ()=>{
 }
 
 
-watch(page, () => {
+watch(()=>query.page, () => {
   fetch();
 });
 

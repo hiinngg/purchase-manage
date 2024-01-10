@@ -31,6 +31,9 @@
 const props = defineProps({
     data:{
         default:()=>[],
+    },
+    originalData:{
+      default:()=>({}),
     }
 })
 const state = reactive({
@@ -50,6 +53,17 @@ const getFormData = async ()=>{
    await form.value.validate('',{silent:true })
    return state;
 }
+
+watch(()=>props.originalData,(data)=>{
+  if(data.material_code){
+    state.materialCode = data.material_code
+  }
+  if(data.quantity){
+    state.quantity = data.quantity
+  }
+},{
+  immediate:true
+})
 
 defineExpose({
     getFormData

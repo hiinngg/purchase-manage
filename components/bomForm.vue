@@ -1,5 +1,10 @@
 <template>
-  <UForm ref="form" :validate="validate" :state="state" class="space-y-4 w-full pb-36">
+  <div v-if="dataLoading" class="space-y-2">
+      <USkeleton class="h-4 w-4/5" />
+      <USkeleton class="h-4 w-3/5" />
+      <USkeleton class="h-4 w-2/5" />
+    </div>
+  <UForm v-else ref="form" :validate="validate" :state="state" class="space-y-4 w-full pb-36">
     <ProductForm ref="productFormRef" :originalData="originalData"  @operSuccess="isOpen = false"></ProductForm>
     <!-- <USelectMenu
         v-model="state.productCode"
@@ -32,6 +37,7 @@
           class="flex items-start w-100%"
         >
           <BomItemForm
+            :originalData="item"
             ref="bomItemForms"
             :data="materialList?.materials"
             class="flex-1"
@@ -81,7 +87,7 @@ const selLoading = ref(true);
 const selMaterialLoading = ref(true);
 const submitLoading = ref(false);
 const isMaterialFormOpen = ref(false);
-
+const dataLoading = ref(false)
 const bomItemList = ref([]);
 const bomItemForms = ref([]);
 
@@ -116,6 +122,9 @@ const handleBomSave = async (event) => {
   try {
     const materialList = [];
     const productInfo = await productFormRef.value.getFormData();
+    if(props.productId){
+      productInfo['productId'] = props.productId
+    }
     for (const key in bomItemForms.value) {
       if (Object.hasOwnProperty.call(bomItemForms.value, key)) {
         const element = bomItemForms.value[key];
@@ -185,12 +194,15 @@ watch(
   async (productId) => {
     //执行查询
     if (productId) {
+      dataLoading.value = true
       const data = await $fetch("/api/product/detail", {
         query: { product_id: productId },
       });
+      
       nextTick(()=>{
         originalData.value = data
         bomItemList.value = Array.isArray(data.bom)?data.bom:[]
+        dataLoading.value = false
       })
 
     }
