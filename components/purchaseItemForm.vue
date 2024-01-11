@@ -14,6 +14,12 @@
         autocomplete="off"
       />
     </UFormGroup>
+    <UFormGroup class="mt-2 w-3/5" label="备注" name="remark">
+      <UInput
+        v-model="state.remark"
+        autocomplete="off"
+      />
+    </UFormGroup>
     <UFormGroup class="mt-2" label="订单明细" name="products">
       <UButton @click="addOrderDetail">增加订单明细</UButton>
       <template v-for="(item, index) in orderDetailList" :key="item.id">
@@ -49,6 +55,7 @@ const props = defineProps({
 const emits = defineEmits(["error"]);
 const state = reactive({
   orderCode: null,
+  remark:"",
   productCodeList: [],
 });
 
@@ -56,6 +63,7 @@ const orderDetailList = ref([]);
 
 if (props.originalData.order_code) {
   state.orderCode = props.originalData.order_code;
+  state.remark = props.originalData.remark;
   if (Array.isArray(props.originalData.order_data)) {
     props.originalData.order_data.map((item) => {
       nextTick(() => {

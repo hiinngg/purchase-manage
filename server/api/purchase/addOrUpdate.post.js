@@ -16,6 +16,7 @@ export default eventHandler(async (event) => {
           purchase_code: purchaseCode,
           order_code: element.orderCode,
           order_data: element.orderDetailList,
+          remark:element.remark,
         };
         if (element.purchase_id) {
           item["purchase_id"] = element.purchase_id;
