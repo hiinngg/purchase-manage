@@ -16,6 +16,9 @@
       <UFormGroup class="mt-2" label="物料型号" name="materialModel">
         <UInput v-model="state.materialModel" autocomplete="off" />
       </UFormGroup>
+      <UFormGroup class="mt-2" label="备注" name="remark">
+        <UInput v-model="state.remark" autocomplete="off" />
+      </UFormGroup>
 
   
       <UButton type="submit" class="mt-4" :loading="submitLoading"> 保存 </UButton>
@@ -27,6 +30,7 @@
     materialCode: undefined,
     materialName: undefined,
     materialModel: undefined,
+    remark:undefined
   });
   
   const form = ref()

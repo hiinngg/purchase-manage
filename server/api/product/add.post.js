@@ -26,7 +26,7 @@ export default eventHandler(async (event) => {
     const {error} = await client.from('product').insert({
        "product_code":body.productCode,
        "product_name":body.productName,
-       "product_model":body.productModel,
+      //  "product_model":body.productModel,
        "product_colortemperature":body.productColortemperature,
        "product_wattage":body.productWattage
     })

@@ -2,20 +2,21 @@
   <UForm
     :validate="validate"
     :state="state"
-    class=""
+    class="grid grid-cols-2 gap-2 "
     ref="form"
     :validateOn="['input', 'submit']"
     @submit="onSubmit"
   >
-    <UFormGroup class="mt-2" label="产品编号" name="productCode">
-      <UInput :disabled="props?.originalData?.product_id" v-model="state.productCode" autocomplete="off" />
-    </UFormGroup>
-    <UFormGroup class="mt-2" label="产品名称" name="productName">
+  <UFormGroup class="mt-2 col-span-2" label="产品名称" name="productName">
       <UInput v-model="state.productName" autocomplete="off" />
     </UFormGroup>
-    <UFormGroup class="mt-2" label="产品型号" name="productModel">
-      <UInput v-model="state.productModel" autocomplete="off" />
+    <UFormGroup class="mt-2 " label="产品编号" name="productCode">
+      <UInput :disabled="props?.originalData?.product_id" v-model="state.productCode" autocomplete="off" />
     </UFormGroup>
+
+    <!-- <UFormGroup class="mt-2" label="产品型号" name="productModel">
+      <UInput v-model="state.productModel" autocomplete="off" />
+    </UFormGroup> -->
     <UFormGroup class="mt-2" label="色温" name="productColortemperature">
       <UInput v-model="state.productColortemperature" autocomplete="off" />
     </UFormGroup>
@@ -37,7 +38,7 @@ const props = defineProps({
 const state = reactive({
   productCode: undefined,
   productName: undefined,
-  productModel: undefined,
+  // productModel: undefined,
   productColortemperature: undefined,
   productWattage: undefined,
 });
@@ -52,8 +53,8 @@ const validate = (state) => {
     errors.push({ path: "productCode", message: "不能为空" });
   if (!state.productName)
     errors.push({ path: "productName", message: "不能为空" });
-  if (!state.productModel)
-    errors.push({ path: "productModel", message: "不能为空" });
+  // if (!state.productModel)
+  //   errors.push({ path: "productModel", message: "不能为空" });
   if (!state.productColortemperature)
     errors.push({ path: "productColortemperature", message: "不能为空" });
   if (!state.productWattage)
@@ -105,7 +106,7 @@ watch(
     nextTick(() => {
       (state.productCode = data.product_code),
         (state.productName = data.product_name),
-        (state.productModel = data.product_model),
+        // (state.productModel = data.product_model),
         (state.productColortemperature = data.product_colortemperature),
         (state.productWattage = data.product_wattage);
     });

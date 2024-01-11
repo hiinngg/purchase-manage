@@ -4,7 +4,7 @@
       <USkeleton class="h-4 w-3/5" />
       <USkeleton class="h-4 w-2/5" />
     </div>
-  <UForm v-else ref="form" :validate="validate" :state="state" class="space-y-4 w-full pb-36">
+  <UForm v-else ref="form" :validate="validate" :state="state" class="space-y-4 w-full overflow-y-auto pb-36 px-2">
     <ProductForm ref="productFormRef" :originalData="originalData"  @operSuccess="isOpen = false"></ProductForm>
     <!-- <USelectMenu
         v-model="state.productCode"
@@ -34,7 +34,7 @@
         <div
           v-for="(item, index) in bomItemList"
           :key="item.id"
-          class="flex items-start w-100%"
+          class="relative w-100% p-4 shadow-lg"
         >
           <BomItemForm
             :originalData="item"
@@ -44,7 +44,7 @@
           ></BomItemForm>
           <UButton
             @click="handleDel(index)"
-            class="ml-2"
+            class="ml-2 absolute right-2 top-0"
             icon="i-heroicons-minus"
             size="sm"
             color="rose"

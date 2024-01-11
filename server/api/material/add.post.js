@@ -27,6 +27,7 @@ export default eventHandler(async (event) => {
        "material_code":body.materialCode,
        "material_name":body.materialName,
        "material_model":body.materialModel,
+       "remark":body.remark
     })
     if(!error){
       return {statusCode:201,message:'操作成功'}

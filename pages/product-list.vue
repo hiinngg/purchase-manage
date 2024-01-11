@@ -65,9 +65,21 @@
       <BomForm  @operClose="isbomFormOpen = false" @operSuccess="isbomFormOpen = false"></BomForm>
     </UCard>
   </UModal> -->
-  <UModal v-model="isbomFormOpen" fullscreen preventClose>
+  <UModal v-model="isbomFormOpen" fullscreen preventClose :ui="{base:'overflow-y-auto'}">
     <UCard>
-      <template #header> {{ currentProductId?'编辑':'新增' }}BOM</template>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div>{{ currentProductId?'编辑':'新增' }}BOM</div>
+          <UButton
+            @click="isbomFormOpen = false"
+            icon="i-heroicons-x-mark-16-solid"
+            size="sm"
+            color="rose"
+            square
+            variant="solid"
+          />
+        </div>
+      </template>
       <BomForm :productId="currentProductId"  @operClose="isbomFormOpen = false" @operSuccess="handleSuccess"></BomForm>
     </UCard>
   </UModal>
@@ -98,10 +110,10 @@ const columns = [
     key: "product_name",
     label: "产品名称",
   },
-  {
-    key: "product_model",
-    label: "产品型号",
-  },
+  // {
+  //   key: "product_model",
+  //   label: "产品型号",
+  // },
   {
     key: "product_colortemperature",
     label: "产品色温",

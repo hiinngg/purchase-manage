@@ -2,7 +2,7 @@
   Hi,欢迎来到采购管理系统~
   <div>
     <input type="file" @change="handleFileUpload" />
-    <!-- <UButton @click="handleAdd" :loading="submitLoading">批量导入</UButton> -->
+    <UButton @click="handleAdd" :loading="submitLoading">批量导入</UButton>
     <pre>{{ jsonOutput }}</pre>
   </div>
 </template>
@@ -97,8 +97,8 @@ const processData = (data) => {
         item.productInfo = {
           productCode: element.code,
           productName: element.name,
-          productModel: element.model,
-          productColortemperature: element.model2 || element.model,
+          // productModel: element.model,
+          productColortemperature: element.model2 || element.model3,
           productWattage: element.model,
         };
 
@@ -111,7 +111,8 @@ const processData = (data) => {
             materialCode: v1.code,
             materialName: v1.name,
             materialModel: v1.model,
-            quantity:1
+            quantity:1,
+            remark:v1.model2
           });
         });
 
