@@ -24,7 +24,7 @@ export default eventHandler(async (event) => {
       .range(startIndex, endIndex);
 
     if (error) {
-      throw new error(error);
+      throw createError(error);
     }
     return {
       total: count,
