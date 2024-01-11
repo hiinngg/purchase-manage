@@ -1,0 +1,145 @@
+﻿<template>
+    <!-- <UButton class="my-8" @click="handleClick">新增产品</UButton>
+   <UButton class="my-8 ml-2" @click="handleMaterialClick">新增物料</UButton> -->
+   <UButton class="my-8 ml-2" @click="handleMaterialClick">新增物料</UButton>
+   <div class="flex items-center mb-2">
+     <UInput class="w-1/3" v-model="query.material_code" placeholder="查询物料编码" />
+     <UButton class="ml-2" @click="fetch">查询</UButton>
+   </div>
+   <UTable
+   :loading="loading"
+   :loading-state="{
+     icon: 'i-heroicons-arrow-path-20-solid',
+     label: '拼命加载中',
+   }"
+   :columns="columns"
+   :rows="data.materialList"
+ >
+   <!-- <template #order_codes-data="{ row }">
+     {{ row.order_codes.join("，") }}
+   </template>
+   <template #created_at-data="{ row }">
+     {{ $dayjs(row.created_at).format("YYYY-MM-DD HH:mm:ss") }}
+   </template> -->
+   <template #created_at-data="{ row }">
+     {{ $dayjs(row.created_at).format("YYYY-MM-DD HH:mm:ss") }}
+   </template>
+   <template #action-data="{ row }">
+     <UButton @click="handleEdit(row)">编辑</UButton>
+   </template>
+ </UTable>
+ <div
+   class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
+ >
+   <UPagination
+     v-if="data.total"
+     v-model="query.page"
+     :page-count="5"
+     :total="data.total"
+   />
+ </div>
+
+ <UModal v-model="isMaterialFormOpen">
+    <UCard>
+      <template #header> {{ currentMaterialData?'编辑':"新增" }}物料 </template>
+      <MaterialForm :originalData="currentMaterialData"  @operSuccess="handleMaterialSuccess"></MaterialForm>
+    </UCard>
+  </UModal>
+</template>
+<script setup>
+
+const isMaterialFormOpen = ref(false);
+const loading = ref(false)
+const query = reactive({
+ page:1,
+ material_code:''
+})
+const data = ref({
+ materialist:[],
+ total:0,
+});
+const handleMaterialClick = () => {
+   isMaterialFormOpen.value = true;
+};
+
+const currentMaterialData = ref(null)
+const columns = [
+ {
+   key: "material_code",
+   label: "物料编码",
+ },
+ {
+   key: "material_name",
+   label: "物料名称",
+ },
+ {
+   key: "material_model",
+   label: "物料规格",
+ },
+ {
+   key: "remark",
+   label: "备注",
+ },
+ {
+   key: "created_at",
+   label: "创建时间",
+ },
+ {
+   key: "action",
+   label: "操作",
+ },
+];
+
+
+
+onMounted(() => {
+ fetch();
+});
+
+
+const fetch = async (force = false) => {
+ loading.value = true
+ const res = await $fetch("/api/material/list", {
+   query,
+ });
+ data.value = res;
+ loading.value = false
+};
+
+
+const handleEdit =async (data)=>{
+
+//   await navigateTo({
+//     path: '/purchase/order',
+//     query: {
+//       purchase_code:id
+//     }
+// })
+currentMaterialData.value = data
+nextTick(()=>{
+    isMaterialFormOpen.value = true
+})
+
+
+
+}
+
+const handleMaterialSuccess = ()=>{
+    isMaterialFormOpen.value = false
+ fetch();
+}
+
+
+watch(()=>query.page, () => {
+ fetch();
+});
+
+
+watch(isMaterialFormOpen,(state)=>{
+ if(!state){
+    currentMaterialData.value = null
+ }
+})
+</script>
+<style lang="scss">
+</style>

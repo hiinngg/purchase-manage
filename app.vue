@@ -36,11 +36,11 @@
 </template>
 <script setup>
 const links = [
-  // {
-  //   label: "新增bom",
-  //   class: "ml-8",
-  //   to: "/bom-form",
-  // },
+  {
+    label: "物料管理",
+    class: "ml-8",
+    to: "/material/list",
+  },
   {
     label: "产品bom管理",
     class: "ml-8",
