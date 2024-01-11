@@ -8,7 +8,7 @@
     @submit="onSubmit"
   >
     <UFormGroup class="mt-2" label="物料编号" name="materialCode">
-      <UInput  :disabled="props.originalData.material_id" v-model="state.materialCode" autocomplete="off" />
+      <UInput  :disabled="props?.originalData?.material_id" v-model="state.materialCode" autocomplete="off" />
     </UFormGroup>
     <UFormGroup class="mt-2" label="物料名称" name="materialName">
       <UInput v-model="state.materialName" autocomplete="off" />
@@ -57,9 +57,9 @@ async function onSubmit(event) {
   submitLoading.value = true;
   const postData = event.data
   let url  = "/api/material/add"
-  if(props.originalData.material_id){
+  if(props?.originalData?.material_id){
      url = "/api/material/edit",
-     postData.material_id = props.originalData.material_id
+     postData.material_id = props?.originalData?.material_id
   }
  
   try {
