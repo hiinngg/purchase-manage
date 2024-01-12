@@ -45,7 +45,7 @@
   >
     <UButton class="mb-8" @click="handleBack">返回订单列表</UButton>
 
-    <UForm :state="materialData" class="space-y-2" ref="form" :validate="validate">
+    <!-- <UForm :state="materialData" class="space-y-2" ref="form" :validate="validate"> -->
       <UTable :columns="columns" :rows="materialData">
         <template #orderCodes-data="{ row }">
           <span>{{ getOrderCodes(row.orderCodes) }}</span>
@@ -63,7 +63,7 @@
             </UFormGroup>
           </template> -->
       </UTable>
-    </UForm>
+    <!-- </UForm> -->
   </div>
 </template>
 <script setup>
@@ -112,6 +112,14 @@ const columns = [
   {
     key: "material_name",
     label: "物料名称",
+  },
+  {
+    key: "material_model",
+    label: "物料规格",
+  },
+  {
+    key: "remark",
+    label: "备注（商家型号）",
   },
   {
     key: "material_stock",
@@ -277,6 +285,7 @@ const processData = (data, orderList) => {
                 id: randomEntry(),
                 material_code: materialItem.material_code,
                 material_name: materialItem.material_name,
+                material_model: materialItem.material_model,
                 stock: materialItem.stock,
                 total_quantity: sumQuantity,
                 origin_data: [orderItem],
@@ -322,6 +331,8 @@ const processOrderList = (originalData) => {
                 const newItem = {
                   material_code: materialItem.material_code,
                   material_name: materialItem.material_name,
+                  material_model: materialItem.material_model,
+                  remark: materialItem.remark,
                   material_stock: materialItem.material_stock,
                   total_price: materialItem.total_price,
                   total_quantity: materialItem.total_quantity,

@@ -26,6 +26,7 @@
    </template>
    <template #action-data="{ row }">
      <UButton @click="handleEdit(row)">编辑</UButton>
+     <UButton class="ml-2" @click="handleStock(row)">库存</UButton>
    </template>
  </UTable>
  <div

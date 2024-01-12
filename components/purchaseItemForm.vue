@@ -32,14 +32,9 @@
             color="red"
             icon="i-heroicons-minus"
           />
-          <!-- <UButton
-            :id="item.id"
-            icon="i-heroicons-magnifying-glass-16-solid"
-            :dynamic="true"
-            :padded="false"
-            color="primary"
-            class="ml-2"
-          ></UButton> -->
+
+     
+       
         </div>
       </template>
     </UFormGroup>

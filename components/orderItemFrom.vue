@@ -17,10 +17,33 @@
           placeholder="选择产品编码"
           :options="productOriginalList"
           option-attribute="product_name"
-          label-attribute="product_code"
           value-attribute="product_code"
           :search-attributes="['product_code', 'product_name']"
         >
+          <template #label>
+            <div class="truncate flex items-center">
+             <div> {{ state.productCode }}</div>
+              <UPopover mode="hover">
+                <UButton
+                  icon="i-heroicons-magnifying-glass-16-solid"
+                  :dynamic="true"
+                  :padded="false"
+                  color="primary"
+                  class="ml-2 mt-1"
+                ></UButton>
+
+                <template #panel>
+                  <div class="p-4">
+                    <span class="truncate">产品编码：{{ currentProduct.product_code }}</span>
+                    <div class="block mt-2">产品名称：{{ currentProduct.product_name }}</div>
+                    <div class="block mt-2">产品色温：{{ currentProduct.product_colortemperature }}</div>
+                    <div class="block mt-2">产品瓦数：{{ currentProduct.product_wattage }}</div>
+                  </div>
+                </template>
+              </UPopover>
+            </div>
+          </template>
+
           <template #option="{ option: product }">
             <span class="truncate"
               >编码：{{ product.product_code }}——名称：{{ product.product_name }}</span
@@ -60,12 +83,30 @@
         v-if="materialList.length > 0"
         :rows="materialList"
       >
-        <template #material_model-data="{ row }">
+        <template #material_name-data="{ row }">
           <UPopover mode="hover">
             <UButton
               color="white"
-              label="规格"
+              :label="row.material_name"
+              trailing-icon="i-heroicons-chevron-down-20-solid"
             />
+
+            <template #panel>
+              <div class="p-4">
+                <span class="truncate">物料编码：{{ row.material_code }}</span>
+                <div class="block mt-2">物料名称：{{ row?.material_name }}</div>
+                <div class="block mt-2 text-wrap" :title="row?.material_model">
+                  物料规格：{{ row?.material_model }}
+                </div>
+                <div class="block mt-2">物料备注：{{ row?.remark }}</div>
+              </div>
+            </template>
+          </UPopover>
+        </template>
+
+        <template #material_model-data="{ row }">
+          <UPopover mode="hover">
+            <UButton color="white" label="规格" />
 
             <template #panel>
               <div class="p-2">{{ row.material_model }}</div>
@@ -192,6 +233,19 @@ const bomStore = useBomStore();
 const form = ref(null);
 const subForm = ref(null);
 
+const currentProduct = computed(()=>{
+  if(productOriginalList?.value){
+   const pro =   productOriginalList.value.find((v)=>{
+    return v.product_code==state.productCode
+  })
+    return pro || {}
+  }else{
+    return {}
+  }
+
+})
+
+
 watch(
   () => state.productCode,
   async (productCode, preProductCode) => {
@@ -248,7 +302,9 @@ const processMData = (data) => {
     const resItem = {
       id: randomEntry(),
       material_code: item.material_code,
-      material_model: bomStore.materialList[item.material_code]["material_details"].material_model,
+      material_model:
+        bomStore.materialList[item.material_code]["material_details"].material_model,
+      remark: bomStore.materialList[item.material_code]["material_details"].remark,
       material_name:
         bomStore.materialList[item.material_code]["material_details"].material_name,
       material_stock:
