@@ -1,11 +1,21 @@
 <template>
   <div v-if="dataLoading" class="space-y-2">
-      <USkeleton class="h-4 w-4/5" />
-      <USkeleton class="h-4 w-3/5" />
-      <USkeleton class="h-4 w-2/5" />
-    </div>
-  <UForm v-else ref="form" :validate="validate" :state="state" class="space-y-4 w-full overflow-y-auto pb-36 px-2">
-    <ProductForm ref="productFormRef" :originalData="originalData"  @operSuccess="isOpen = false"></ProductForm>
+    <USkeleton class="h-4 w-4/5" />
+    <USkeleton class="h-4 w-3/5" />
+    <USkeleton class="h-4 w-2/5" />
+  </div>
+  <UForm
+    v-else
+    ref="form"
+    :validate="validate"
+    :state="state"
+    class="space-y-4 w-full overflow-y-auto pb-36 px-2"
+  >
+    <ProductForm
+      ref="productFormRef"
+      :originalData="originalData"
+      @operSuccess="isOpen = false"
+    ></ProductForm>
     <!-- <USelectMenu
         v-model="state.productCode"
         :loading="selLoading"
@@ -80,14 +90,14 @@ const props = defineProps({
   },
 });
 
-const originalData = ref(null)
+const originalData = ref(null);
 const toast = useToast();
 
 const selLoading = ref(true);
 const selMaterialLoading = ref(true);
 const submitLoading = ref(false);
 const isMaterialFormOpen = ref(false);
-const dataLoading = ref(false)
+const dataLoading = ref(false);
 const bomItemList = ref([]);
 const bomItemForms = ref([]);
 
@@ -97,7 +107,7 @@ const state = reactive({
   materiaCodes: [],
 });
 
-const productStore = useProductStore()
+const productStore = useProductStore();
 // const productList = await productStore.fetchProduct();
 // toRef(productList)
 
@@ -122,8 +132,8 @@ const handleBomSave = async (event) => {
   try {
     const materialList = [];
     const productInfo = await productFormRef.value.getFormData();
-    if(props.productId){
-      productInfo['productId'] = props.productId
+    if (props.productId) {
+      productInfo["productId"] = props.productId;
     }
     for (const key in bomItemForms.value) {
       if (Object.hasOwnProperty.call(bomItemForms.value, key)) {
@@ -156,7 +166,7 @@ async function onSubmit(postData) {
       watch: false,
     });
     if (data.value.statusCode == "201") {
-      productStore.$reset()
+      productStore.$reset();
       toast.add({ title: "操作成功" });
       emits("operSuccess");
     } else {
@@ -194,20 +204,20 @@ watch(
   async (productId) => {
     //执行查询
     if (productId) {
-      dataLoading.value = true
+      dataLoading.value = true;
       const data = await $fetch("/api/product/detail", {
         query: { product_id: productId },
       });
-      
-      nextTick(()=>{
-        originalData.value = data
-        bomItemList.value = Array.isArray(data.bom)?data.bom:[]
-        dataLoading.value = false
-      })
 
+      nextTick(() => {
+        originalData.value = data;
+        bomItemList.value = Array.isArray(data.bom) ? data.bom : [];
+        dataLoading.value = false;
+      });
     }
-  },{
-    immediate:true
+  },
+  {
+    immediate: true,
   }
 );
 </script>

@@ -23,7 +23,8 @@
           :uiMenu="{ width: ' w-1/4', popper: {} }"
         >
           <template #option="{ option: material }">
-             <span>{{ material.material_code }}</span>;<span>{{ material.material_name }}</span>
+            <span>{{ material.material_code }}</span
+            >;<span>{{ material.material_name }}</span>
           </template>
         </USelectMenu>
       </UFormGroup>
@@ -79,7 +80,7 @@ const validate = (state) => {
 };
 
 const getFormData = async () => {
-  await form.value.validate("", { silent: true });
+  await form.value.validate();
   return state;
 };
 
