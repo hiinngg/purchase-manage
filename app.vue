@@ -10,13 +10,7 @@
    
     </UPage> -->
 
-
-
-  <div  class="max-h-screen h-screen">
-
-
-
-
+  <div class="max-h-screen h-screen">
     <div
       class="py-4 pl-12 font-bold inline-block align-middle"
       style="height: 60px; box-sizing: border-box"

@@ -22,7 +22,7 @@
         >
           <template #label>
             <div class="truncate flex items-center">
-             <div> {{ state.productCode }}</div>
+              <div>{{ state.productCode }}</div>
               <UPopover mode="hover">
                 <UButton
                   icon="i-heroicons-magnifying-glass-16-solid"
@@ -34,10 +34,18 @@
 
                 <template #panel>
                   <div class="p-4">
-                    <span class="truncate">产品编码：{{ currentProduct.product_code }}</span>
-                    <div class="block mt-2">产品名称：{{ currentProduct.product_name }}</div>
-                    <div class="block mt-2">产品色温：{{ currentProduct.product_colortemperature }}</div>
-                    <div class="block mt-2">产品瓦数：{{ currentProduct.product_wattage }}</div>
+                    <span class="truncate"
+                      >产品编码：{{ currentProduct.product_code }}</span
+                    >
+                    <div class="block mt-2">
+                      产品名称：{{ currentProduct.product_name }}
+                    </div>
+                    <div class="block mt-2">
+                      产品色温：{{ currentProduct.product_colortemperature }}
+                    </div>
+                    <div class="block mt-2">
+                      产品瓦数：{{ currentProduct.product_wattage }}
+                    </div>
                   </div>
                 </template>
               </UPopover>
@@ -233,18 +241,16 @@ const bomStore = useBomStore();
 const form = ref(null);
 const subForm = ref(null);
 
-const currentProduct = computed(()=>{
-  if(productOriginalList?.value){
-   const pro =   productOriginalList.value.find((v)=>{
-    return v.product_code==state.productCode
-  })
-    return pro || {}
-  }else{
-    return {}
+const currentProduct = computed(() => {
+  if (productOriginalList?.value) {
+    const pro = productOriginalList.value.find((v) => {
+      return v.product_code == state.productCode;
+    });
+    return pro || {};
+  } else {
+    return {};
   }
-
-})
-
+});
 
 watch(
   () => state.productCode,
@@ -346,10 +352,10 @@ const validate = async (state) => {
     errors.push({ path: "quantity", message: "请输入正确数量" });
   }
   if (materialData.value.length == 0) {
-    errors.push({
-      path: "productCode",
-      message: "请选择物料",
-    });
+    // errors.push({
+    //   path: "productCode",
+    //   message: "请选择物料",
+    // });
   }
 
   return errors;

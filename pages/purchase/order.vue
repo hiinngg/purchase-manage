@@ -10,9 +10,7 @@
     class="w-full pb-8 px-8"
     style="overflow-y: auto; height: 100%"
   >
-    <UButton v-if="!route.query.purchase_code" class="mb-8" @click="handleAdd"
-      >增加订单</UButton
-    >
+    <UButton class="mb-8" @click="handleAdd">增加订单</UButton>
     <UButton class="mb-8 ml-2" @click="handleCompute(false)" :loading="computeLoading"
       >汇总计算</UButton
     >
@@ -46,11 +44,11 @@
     <UButton class="mb-8" @click="handleBack">返回订单列表</UButton>
 
     <!-- <UForm :state="materialData" class="space-y-2" ref="form" :validate="validate"> -->
-      <UTable :columns="columns" :rows="materialData">
-        <template #orderCodes-data="{ row }">
-          <span>{{ getOrderCodes(row.orderCodes) }}</span>
-        </template>
-        <!-- <template #total_quantity-data="{ row }">
+    <UTable :columns="columns" :rows="materialData">
+      <template #orderCodes-data="{ row }">
+        <span>{{ getOrderCodes(row.orderCodes) }}</span>
+      </template>
+      <!-- <template #total_quantity-data="{ row }">
             <UFormGroup class="w-2/6" :name="'quantity-' + row.id">
               <UInput v-model="row.total_quantity" type="number"> </UInput>
             </UFormGroup>
@@ -62,7 +60,7 @@
               </UInput>
             </UFormGroup>
           </template> -->
-      </UTable>
+    </UTable>
     <!-- </UForm> -->
   </div>
 </template>
@@ -70,7 +68,7 @@
 const toast = useToast();
 const productStore = useProductStore();
 const bomStore = useBomStore();
-bomStore.$reset()
+bomStore.$reset();
 const editModeLoading = ref(false);
 
 onMounted(async () => {
@@ -102,7 +100,6 @@ const whetherResult = ref(false);
 
 const form = ref(null);
 const materialData = ref([]);
-
 
 const columns = [
   {
@@ -170,6 +167,7 @@ const handleCompute = async (whetherSave = false) => {
         const element = purchaseForm.value[key];
 
         const itemData = await element.getFormData();
+
         _data.push(itemData);
       }
     }
@@ -188,6 +186,7 @@ const handleCompute = async (whetherSave = false) => {
         method: "post",
         body: {
           data: {
+            purchaseCode: route.query.purchase_code || null,
             purchaseData: _data,
             purchaseDetailData: materialData.value.map((v) => ({
               ...v,

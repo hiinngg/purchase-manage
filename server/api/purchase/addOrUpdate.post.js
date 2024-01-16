@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
 
     //插入
     const purchaseData = [];
-    const purchaseCode = randomEntry("PO");
+    let purchaseCode = body.data.purchaseCode || randomEntry("PO");
     for (const key in body.data.purchaseData) {
       if (Object.hasOwnProperty.call(body.data.purchaseData, key)) {
         const element = body.data.purchaseData[key];
